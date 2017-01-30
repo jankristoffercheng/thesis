@@ -1,6 +1,7 @@
+import numpy as np
+
 from connection.Connection import Connection
 from features.POSFeature import POSFeature
-
 
 class PostsDAO:
     def addPost(self, username, text, hour, min):
@@ -48,3 +49,21 @@ class PostsDAO:
             classes.append(row['gender'])
             row = cursor.fetchone()
         return {'Dimensions':dimensions, 'Classes': classes}
+
+    def getTrainingGenderPreferentialData(self):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'SELECT P.text, U.gender FROM posts P, users U WHERE P.user_id = U.id;'
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        dimensions = []
+        classes = []
+        while row is not None:
+            dimensions.append(row['text'])
+            classes.append(row['gender'])
+            row = cursor.fetchone()
+
+
+        return {'Dimensions':dimensions, 'Classes': classes}
+
+

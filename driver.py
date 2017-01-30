@@ -6,7 +6,10 @@ from dao.PostsDAO import PostsDAO
 from features.POSFeature import POSFeature
 from sklearn.externals import joblib
 
-conn = Connection().getConnection()
+print("hello world")
+
+# conn = Connection().getConnection()
+
 '''
 cursor = conn.cursor()
 sql = 'SELECT * FROM users;'
@@ -24,7 +27,7 @@ controller.addUser('conan', 'F', '2000', '01', '01', 'Twitter')
 
 # joblib.dump(clf, 'prototype.pkl')
 
-clf = Controller().trainSVM()
+clf = Controller().trainGenderPreferential()
 #clf = joblib.load('prototype.pkl')
 #print(Controller().classifyGenderUsingSVMwithPersist(clf, '@anierlebasi that is what you are... Honey you\'re my golden star.... I know you could make my wish come true. (Napakanta ako)'))
 #print(Controller().classifyGenderUsingSVM("@Aryellitaaa Hahaha. Walaaaa! Sige."))
