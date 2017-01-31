@@ -1,3 +1,4 @@
+from classification.MultinomialNaive import MultinomialNaive
 from classification.SVM import SVM
 from dao.PostsDAO import PostsDAO
 from dao.UsersDAO import UsersDAO
@@ -9,6 +10,7 @@ class Controller:
         self.usersDAO = UsersDAO()
         self.postsDAO = PostsDAO()
         self.svm = SVM()
+        self.multinomial = MultinomialNaive()
 
     def addUser(self, username, gender, birthyear, birthmonth, birthday, source):
         self.usersDAO.addUser(username, gender, birthyear, birthmonth, birthday, source)
@@ -37,3 +39,10 @@ class Controller:
         trainingData = self.postsDAO.getTrainingData()
         print('training')
         return self.svm.train(trainingData['Dimensions'], trainingData['Classes'])
+
+    def trainGenderPreferential(self):
+        print('getting')
+        trainingData = self.postsDAO.getTrainingGenderPreferentialData()
+        print('training')
+        clf = self.multinomial.train(trainingData['Dimensions'], trainingData['Classes'])
+        self.multinomial.classifyPersist(clf, ['dota', 'lipstick'])
