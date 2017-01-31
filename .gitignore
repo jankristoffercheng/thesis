@@ -1,3 +1,2 @@
+.idea
 *.pyc
-dao/__pycache__/PostsDAO.cpython-35.pyc
-.idea/workspace.xml
