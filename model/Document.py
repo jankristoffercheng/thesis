@@ -1,4 +1,4 @@
 class Document:
-    def __init__(self, content):
+    def __init__(self, content, posSequence):
         self.content = content
-        self.posSequence = None
+        self.posSequence = posSequence

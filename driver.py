@@ -26,8 +26,8 @@ controller.addUser('conan', 'F', '2000', '01', '01', 'Twitter')
 
 
 # joblib.dump(clf, 'prototype.pkl')
-
-clf = Controller().trainGenderPreferential()
+#clf = Controller().trainGenderPreferential()
+clf = Controller().trainPOSSequencePatternWithTree()
 #clf = joblib.load('prototype.pkl')
 #print(Controller().classifyGenderUsingSVMwithPersist(clf, '@anierlebasi that is what you are... Honey you\'re my golden star.... I know you could make my wish come true. (Napakanta ako)'))
 #print(Controller().classifyGenderUsingSVM("@Aryellitaaa Hahaha. Walaaaa! Sige."))

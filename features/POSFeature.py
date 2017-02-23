@@ -10,7 +10,9 @@ class POSFeature:
     def __init__(self, text):
         self.nVerbs = 0
         self.nAdjectives = 0
+        self.sPOS = ''
         self.getPOSCount(text)
+        self.getPOSTag(text)
 
     def getPOSCount(self, text):
         tokenizedText = nltk.word_tokenize(text)
@@ -21,3 +23,11 @@ class POSFeature:
                 self.nVerbs += value
             if key.startswith(self.ADJECTIVE):
                 self.nAdjectives += value
+
+    def getPOSTag(self, text):
+        tokenizedText = nltk.word_tokenize(text)
+        posTagged = nltk.pos_tag(tokenizedText)
+        posTagged = ['-' + tag[1] for tag in posTagged]
+        self.sPOS = ''.join(posTagged)[1:]
+        self.sPOS = "'"+self.sPOS+"'"
+        print("POS:", self.sPOS)

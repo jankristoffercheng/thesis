@@ -17,9 +17,9 @@ class MultinomialNaive:
 
         X_train_tfidf = self.tfidf_transformer.fit_transform(dtm)
 
-        # clf = MultinomialNB().fit(X_train_tfidf, classes)
-        clf = svm.SVC(kernel='linear')
-        clf = clf.fit(X_train_tfidf, classes)
+        clf = MultinomialNB().fit(X_train_tfidf, classes)
+        #clf = svm.SVC(kernel='linear')
+        #clf = clf.fit(X_train_tfidf, classes)
         return clf
 
     def classify(self, dimensions, classes, test):

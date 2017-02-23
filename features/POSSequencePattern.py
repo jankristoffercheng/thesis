@@ -10,7 +10,7 @@ class POSSequencePattern:
     MAX_LENGTH = 7
 
     def __init__(self, documentList):
-        self.documentList = [Document(document) for document in documentList]
+        self.documentList = documentList
         self.tagList = []
         self.cList = []
         self.fList = []
@@ -20,16 +20,10 @@ class POSSequencePattern:
 
         tagDict = {}
         for document in self.documentList:
-            tokenizedText = nltk.word_tokenize(document.content)
-            posTagged = nltk.pos_tag(tokenizedText)
-            posTagged = ['-' + tag[1] for tag in posTagged]
-            pos = ''.join(posTagged)[1:]
-            print("POS: ", pos)
-            document.posSequence = pos
-
             #tag[0] = word
             #tag[1] = POS equivalent
-            for tag in list(set(pos.split('-'))):
+            print("POS: ",document.posSequence)
+            for tag in list(set(document.posSequence.split('-'))):
                 tagDict[tag] = tagDict[tag] + 1 if tag in tagDict else 1
 
             self.cList.append(tagDict)
@@ -92,10 +86,10 @@ class POSSequencePattern:
 
         return countPOS
 
-document = []
-document.append("Start a shit a")
-document.append("Jump the rope a")
-document.append("Create shit blog a")
+#document = []
+#document.append("Start a shit a")
+#document.append("Jump the rope a")
+#document.append("Create shit blog a")
 
-p = POSSequencePattern(document)
-print("RESULT: ",p.minePOSPatterns(0.30, 0.2))
+#p = POSSequencePattern(document)
+#print("RESULT: ",p.minePOSPatterns(0.30, 0.2))

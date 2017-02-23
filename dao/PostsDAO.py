@@ -2,6 +2,8 @@ import numpy as np
 
 from connection.Connection import Connection
 from features.POSFeature import POSFeature
+from model.Document import Document
+
 
 class PostsDAO:
     def addPost(self, username, text, hour, min):
@@ -28,9 +30,10 @@ class PostsDAO:
             posFeature = POSFeature(text)
             nVerbs = posFeature.nVerbs
             nAdjectives = posFeature.nAdjectives
+            sPOS = posFeature.sPOS
 
             cursor2 = conn.cursor()
-            sql = 'UPDATE posts SET nVerbs = ' + str(nVerbs) + ', nAdjectives = ' + str(nAdjectives) + ' WHERE id = ' + str(id)
+            sql = 'UPDATE posts SET nVerbs = ' + str(nVerbs) + ', nAdjectives = ' + str(nAdjectives) +', sPOS = ' + str(sPOS)+' WHERE id = ' + str(id)
             cursor2.execute(sql)
             row = cursor.fetchone()
             print(id)
@@ -65,5 +68,26 @@ class PostsDAO:
 
 
         return {'Dimensions':dimensions, 'Classes': classes}
+
+
+    def getTrainingPOSData(self):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'SELECT P.text, P.sPOS, U.gender FROM posts P, users U WHERE P.user_id = U.id;'
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        dimensions = []
+        classes = []
+        documentList = []
+        while row is not None:
+            sPOS = row['sPOS']
+            document = Document(row['text'],sPOS)
+            dimensions.append(sPOS)
+            classes.append(row['gender'])
+            documentList.append(document)
+
+            row = cursor.fetchone()
+
+        return {'Dimensions': dimensions, 'Classes': classes, 'Documents': documentList}
 
 
