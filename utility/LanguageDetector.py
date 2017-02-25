@@ -10,7 +10,7 @@ from langdetect import lang_detect_exception
 #print(gs.translate('Dahil puno na sa seeing you Shayane.', 'en'))
 
 
-import polyglot
+'''import polyglot
 from polyglot.text import Text, Word
 text = Text("Mahal ko kayo lahat! Alam niyo ba yun?")
 print("Language Detected: Code={}, Name={}\n".format(text.language.code, text.language.name))
@@ -22,7 +22,7 @@ from polyglot.transliteration import Transliterator
 blob = """We will meet at eight o'clock on Thursday morning."""
 text = Text(blob)
 for x in text.transliterate("tl"):
-  print(x)
+  print(x)'''
 
 class Language:
     UNKNOWN = -1
@@ -79,7 +79,7 @@ class LanguageDetector:
 
 
 ## trial
-langdetect = LanguageDetector()
+'''langdetect = LanguageDetector()
 language = Language()
 
 print(language.getLanguage(langdetect.getLanguage("Maglalagay sana ako ng caption na malalim kaso di ako artist.")))
@@ -87,4 +87,4 @@ print(language.getLanguage(langdetect.getLanguage("!!!")))
 print(language.getLanguage(langdetect.getLanguage("Dahil puno na sa restaurant, mom, shoti, and I were asked to share a seat with a customer. Buti nalang ikaw kasama namin sa table. Nice seeing you Shayane.")))
 print(language.getLanguage(langdetect.getLanguage("Ahhhh tangina puso ko. Tama ka Joon Hyung my heart is fckn flattering")))
 langdetect.englishOrTagalog("ampotek hahaha")
-langdetect.getLanguageDetailed(("ahhhh tangina puso ko. tama ka Joon Hyung my heart is fckn flattering.").lower())
+langdetect.getLanguageDetailed(("ahhhh tangina puso ko. tama ka Joon Hyung my heart is fckn flattering.").lower())'''
