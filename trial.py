@@ -8,6 +8,7 @@ print(detect_langs("Maglalagay sana ako ng caption na malalim kaso di ako artist
 print(detect_langs("Dahil puno na sa restaurant, mom, shoti, and I were asked to share a seat with a customer. Buti nalang ikaw kasama namin sa table. Nice seeing you Shayane."))
 print(detect_langs("asdfhu asdf;uih asdiufh asdui"))'''
 from utility.NormalizeFilipino import NormalizeFilipino
+from utility.PostCleaner import PostCleaner
 
 '''import langid
 
@@ -50,4 +51,8 @@ print(output)
 jpype.shutdownJVM()
 '''
 
-print(NormalizeFilipino().normalize_Filipino("and2 n q"))
+
+post_cleaner = PostCleaner()
+
+text = 'shiz life 💪 💪 💪💪💪'
+print(post_cleaner.removeEmojis(text))

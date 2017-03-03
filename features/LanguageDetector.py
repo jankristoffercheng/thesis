@@ -12,17 +12,12 @@ from langdetect import lang_detect_exception
 
 import polyglot
 from polyglot.text import Text, Word
+
+from utility.NormalizeFilipino import NormalizeFilipino
+
 text = Text("Mahal ko kayo lahat! Alam niyo ba yun?")
 print("Language Detected: Code={}, Name={}\n".format(text.language.code, text.language.name))
 
-from polyglot.transliteration import Transliterator
-#transliterator = Transliterator(source_lang="en", target_lang="tl")
-#print(transliterator.transliterate(u"I love you"))
-
-blob = """We will meet at eight o'clock on Thursday morning."""
-text = Text(blob)
-for x in text.transliterate("tl"):
-  print(x)
 
 class Language:
     UNKNOWN = -1
@@ -88,3 +83,6 @@ print(language.getLanguage(langdetect.getLanguage("Dahil puno na sa restaurant, 
 print(language.getLanguage(langdetect.getLanguage("Ahhhh tangina puso ko. Tama ka Joon Hyung my heart is fckn flattering")))
 langdetect.englishOrTagalog("ampotek hahaha")
 langdetect.getLanguageDetailed(("ahhhh tangina puso ko. tama ka Joon Hyung my heart is fckn flattering.").lower())
+
+norm = NormalizeFilipino()
+print(norm.normalize_Filipino("and2 na aq"))
