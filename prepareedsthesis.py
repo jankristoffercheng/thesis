@@ -7,6 +7,8 @@ import json
 import pytz
 from dateutil.parser import parse
 
+from features.POSFeature import POSFeature
+
 
 class ConnectionFactory:
     def getConnectionThesis(self):
@@ -41,13 +43,16 @@ def addposts():
                 row = cursor.fetchone()
                 id = int(row['Id'])
 
+                posproc = POSFeature(i['text'])
+
+
                 try:
-                    cursor.execute('INSERT INTO Post(User, Text, Time) VALUES (%s,%s,%s)',
-                                   (id, i['text'], philver.strftime("%H:%M")))
+                    cursor.execute('INSERT INTO Post(User, Text, Time, POS) VALUES (%s,%s,%s,%s)',
+                                   (id, i['text'], philver.strftime("%H:%M"), posproc.sPOS))
                 except Exception:
                     print('fuuu')
 
-def addusers():
+def addusers(limit=None):
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
@@ -58,13 +63,15 @@ def addusers():
     with open('PersonalInfo_filtered.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter=';')
 
+        ind = 0
         for row in readCSV:
-            if (row[11] == "PH" and int(row[12].split()[0]) >= 8):
+            if ((limit == None or ind < limit) and (row[11] == "PH" and int(row[12].split()[0]) >= 8)):
                 sex = 'F'
                 if (row[4] == 'male'):
                     sex = 'M'
                 cursor.execute('INSERT INTO User(Username, Gender, Birthdate, Source) VALUES (%s,%s,%s,%s)',
                                (row[0], sex, row[3] + "-" + str(row[1]).zfill(2) + "-" + row[2], 'Twitter'))
+                ind+=1
 
 def fixjson():
     import fileinput
@@ -74,3 +81,6 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 
+
+addusers(5)
+addposts()

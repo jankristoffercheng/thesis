@@ -7,8 +7,10 @@ DetectorFactory.seed = 0
 print(detect_langs("Maglalagay sana ako ng caption na malalim kaso di ako artist."))
 print(detect_langs("Dahil puno na sa restaurant, mom, shoti, and I were asked to share a seat with a customer. Buti nalang ikaw kasama namin sa table. Nice seeing you Shayane."))
 print(detect_langs("asdfhu asdf;uih asdiufh asdui"))'''
-from utility.NormalizeFilipino import NormalizeFilipino
-from utility.PostCleaner import PostCleaner
+from sklearn.feature_extraction.text import CountVectorizer
+
+# from utility.NormalizeFilipino import NormalizeFilipino
+# from utility.PostCleaner import PostCleaner
 
 
 '''import langid
@@ -64,9 +66,14 @@ print(result["text"][0])'''
 '''from utility.TranslateYandex import TranslateYandex
 print(TranslateYandex().translateText("Mahilig ako sa hayop"))'''
 
-post_cleaner = PostCleaner()
+# post_cleaner = PostCleaner()
+#
+# text = 'shiz life 💪 💪 💪💪💪'
+# print(post_cleaner.removeEmojis(text))
 
-text = 'shiz life 💪 💪 💪💪💪'
-print(post_cleaner.removeEmojis(text))
-
-
+str = ["hello rissa","rissa rocks"]
+count_vect = CountVectorizer()
+X_train_counts = count_vect.fit_transform(str)
+print(X_train_counts)
+print(count_vect.vocabulary_.get(u'hello'))
+print(count_vect.vocabulary_.get(u'rissa'))

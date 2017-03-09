@@ -11,7 +11,7 @@ class POSFeature:
         self.nVerbs = 0
         self.nAdjectives = 0
         self.sPOS = ''
-        self.getPOSCount(text)
+        #self.getPOSCount(text)
         self.getPOSTag(text)
 
     def getPOSCount(self, text):
@@ -31,3 +31,5 @@ class POSFeature:
         self.sPOS = ''.join(posTagged)[1:]
         self.sPOS = "'"+self.sPOS+"'"
         print("POS:", self.sPOS)
+
+

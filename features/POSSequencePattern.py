@@ -22,7 +22,7 @@ class POSSequencePattern:
         for document in self.documentList:
             #tag[0] = word
             #tag[1] = POS equivalent
-            print("POS: ",document.posSequence)
+            #print("POS: ",document.posSequence)
             for tag in list(set(document.posSequence.split('-'))):
                 tagDict[tag] = tagDict[tag] + 1 if tag in tagDict else 1
 
@@ -86,10 +86,10 @@ class POSSequencePattern:
 
         return countPOS
 
-#document = []
-#document.append("Start a shit a")
-#document.append("Jump the rope a")
-#document.append("Create shit blog a")
-
-#p = POSSequencePattern(document)
-#print("RESULT: ",p.minePOSPatterns(0.30, 0.2))
+# document = []
+# document.append("Start a shit a")
+# document.append("Jump the rope a")
+# document.append("Create shit blog a")
+#
+# p = POSSequencePattern(document)
+# print("RESULT: ",p.minePOSPatterns(0.30, 0.2))
