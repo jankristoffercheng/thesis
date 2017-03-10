@@ -1,2 +1,4 @@
 .idea
 *.pyc
+edsthesis_data.json
+PersonalInfo_filtered.csv
