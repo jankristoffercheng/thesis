@@ -12,8 +12,12 @@ from langdetect import lang_detect_exception
 
 '''import polyglot
 from polyglot.text import Text, Word
+
+from utility.NormalizeFilipino import NormalizeFilipino
+
 text = Text("Mahal ko kayo lahat! Alam niyo ba yun?")
 print("Language Detected: Code={}, Name={}\n".format(text.language.code, text.language.name))
+
 
 from polyglot.transliteration import Transliterator
 #transliterator = Transliterator(source_lang="en", target_lang="tl")
@@ -77,14 +81,3 @@ class LanguageDetector:
                 return item.lang
         return None
 
-
-## trial
-'''langdetect = LanguageDetector()
-language = Language()
-
-print(language.getLanguage(langdetect.getLanguage("Maglalagay sana ako ng caption na malalim kaso di ako artist.")))
-print(language.getLanguage(langdetect.getLanguage("!!!")))
-print(language.getLanguage(langdetect.getLanguage("Dahil puno na sa restaurant, mom, shoti, and I were asked to share a seat with a customer. Buti nalang ikaw kasama namin sa table. Nice seeing you Shayane.")))
-print(language.getLanguage(langdetect.getLanguage("Ahhhh tangina puso ko. Tama ka Joon Hyung my heart is fckn flattering")))
-langdetect.englishOrTagalog("ampotek hahaha")
-langdetect.getLanguageDetailed(("ahhhh tangina puso ko. tama ka Joon Hyung my heart is fckn flattering.").lower())'''
