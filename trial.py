@@ -10,7 +10,6 @@ print(detect_langs("asdfhu asdf;uih asdiufh asdui"))'''
 from utility.NormalizeFilipino import NormalizeFilipino
 from utility.PostCleaner import PostCleaner
 
-
 '''import langid
 
 from langid.langid import LanguageIdentifier, model
@@ -41,18 +40,18 @@ text = Text(blob)
 for x in text.transliterate("en"):
     print(x)'''
 
-'''import jpype
+import jpype
 from jpype import *
 
 jvmPath = jpype.getDefaultJVMPath()
-jpype.startJVM(jvmPath, "-Djava.class.path=C:/Users/Avril_PC/Documents/Jars/NormAPI.jar")
+jpype.startJVM(jvmPath, "-Djava.class.path=C:/Users/sharkscion/Documents/DLSU Computer Science/Development Files/JAR Files/NormAPI.jar")
 normapi = JPackage("normapi").NormAPI
 output = normapi.normalize_Text("and2 n q nkta m b q")
 print(output)
 jpype.shutdownJVM()
-'''
-#from utility.NormalizeFilipino import NormalizeFilipino
-'''print(NormalizeFilipino().normalize_Filipino("magllgay sna aq ng caption na malalim pro mahaba masyado"))'''
+
+from utility.NormalizeFilipino import NormalizeFilipino
+print(NormalizeFilipino().normalize_Filipino("magllgay sna aq ng caption na malalim pro mahaba masyado"))
 
 '''from yandex_translate import YandexTranslate
 translate = YandexTranslate('trnsl.1.1.20170225T080044Z.7a0894099424d9cf.24ff5ce7f70e0b9adeca2c5aac006b98d9c9fc29')
@@ -64,9 +63,9 @@ print(result["text"][0])'''
 '''from utility.TranslateYandex import TranslateYandex
 print(TranslateYandex().translateText("Mahilig ako sa hayop"))'''
 
-post_cleaner = PostCleaner()
-
-text = 'shiz life 💪 💪 💪💪💪'
-print(post_cleaner.removeEmojis(text))
+# post_cleaner = PostCleaner()
+#
+# text = 'shiz life 💪 💪 💪💪💪 hello💪some where only we know! 💪'
+# print(post_cleaner.getEmojis(text))
 
 
