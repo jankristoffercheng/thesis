@@ -61,3 +61,8 @@ print(result["text"][0])'''
 
 '''from utility.TranslateYandex import TranslateYandex
 print(TranslateYandex().translateText("Mahilig ako sa hayop"))'''
+
+text = '💪💪'
+text = text.encode('unicode-escape')
+text = str(text, 'unicode-escape')
+print(text)
