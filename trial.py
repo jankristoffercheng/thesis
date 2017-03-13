@@ -41,7 +41,7 @@ text = Text(blob)
 
 for x in text.transliterate("en"):
     print(x)'''
-
+'''
 import jpype
 from jpype import *
 
@@ -54,7 +54,7 @@ jpype.shutdownJVM()
 
 from utility.NormalizeFilipino import NormalizeFilipino
 print(NormalizeFilipino().normalize_Filipino("magllgay sna aq ng caption na malalim pro mahaba masyado"))
-
+'''
 '''from yandex_translate import YandexTranslate
 translate = YandexTranslate('trnsl.1.1.20170225T080044Z.7a0894099424d9cf.24ff5ce7f70e0b9adeca2c5aac006b98d9c9fc29')
 result=translate.translate('Ako ay mahilig sa mga hayop!', 'tl-en')
@@ -70,10 +70,15 @@ print(TranslateYandex().translateText("Mahilig ako sa hayop"))'''
 
 # text = 'shiz life 💪 💪 💪💪💪'
 # print(post_cleaner.removeEmojis(text))
-
+'''
 str = ["hello rissa","rissa rocks"]
 count_vect = CountVectorizer()
 X_train_counts = count_vect.fit_transform(str)
 print(X_train_counts)
 print(count_vect.vocabulary_.get(u'hello'))
 print(count_vect.vocabulary_.get(u'rissa'))
+'''
+import nltk
+from features.POSFeature import POSFeature
+str = 'hello my name is awesome'
+posTagger = POSFeature(str)
