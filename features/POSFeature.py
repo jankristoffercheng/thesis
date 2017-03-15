@@ -32,22 +32,10 @@ class POSFeature:
         tokenizedText = nltk.word_tokenize(text)
         posTagged = nltk.pos_tag(tokenizedText)
         engTags = [tag[1] for tag in posTagged]
-
-        #get filipino tags from tagalog tagger and map them to nltk tags
-        filTags = ['NN', 'NN', 'NN', 'UNK', 'JJ']
-
-        jvmPath = jpype.getDefaultJVMPath()
-        jpype.startJVM(jvmPath,"-Djava.class.path=dependencies/RBPOST.jar")
-        rbpost = JPackage("rbpost").RBPOST
-        hello = rbpost.hPOST_Text(text)
-
-        print('HELLO: ' + hello)
-
-        jpype.shutdownJVM()
-
         #final tags
-        posTags = []
+        posTags = engTags
 
+        '''
         langDetector = LanguageDetector()
         language = langDetector.getLanguage(text)
         for i in range(len(engTags)):
@@ -57,13 +45,8 @@ class POSFeature:
                 posTags.append(filTags[i])
             else:
                 posTags.append(engTags[i])
+        '''
 
         posTags = ['-' + tag for tag in posTags]
         self.sPOS = ''.join(posTags)[1:]
-        self.sPOS = "'"+self.sPOS+"'"
-        print(language)
-        print(engTags)
-        print(filTags)
-        print("POS:", self.sPOS)
-
 
