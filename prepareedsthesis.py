@@ -47,10 +47,10 @@ def addposts():
 
 
                 try:
-                    cursor.execute('INSERT INTO Post(User, Text, Time, POS) VALUES (%s,%s,%s,%s)',
-                                   (id, i['text'], philver.strftime("%H:%M"), posproc.sPOS))
-                except Exception:
-                    print('fuuu')
+                    cursor.execute('INSERT INTO Post(User, Text, PostTime, POS) VALUES (%s,%s,%s,%s)',
+                                   (id, i['text'], philver.strftime("%H:%M"), posproc.sPOS[1:-1]))
+                except Exception as e:
+                    print('fuuu', str(e))
 
 def addusers(limit=None):
     conn = ConnectionFactory().getConnectionThesis()
@@ -81,6 +81,5 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 
-
-addusers(5)
+addusers(10)
 addposts()
