@@ -1,17 +1,25 @@
 from pandas import DataFrame
 from sklearn.base import TransformerMixin
+from sklearn.preprocessing import MultiLabelBinarizer
 
 
 class AgeRangeWrap(TransformerMixin):
 
     def transform(self, X, **transform_params):
 
-        agerange = DataFrame(X.apply(enrange))
-        return agerange
+        agerange = X.apply(enrange)
+
+        mlb = MultiLabelBinarizer(classes=[0,1,2,3,4])
+        temp = agerange.apply(lambda x: [x])
+        data = DataFrame(data=mlb.fit_transform(temp), columns=["Stk." + age for age in getClasses()])
+
+        return data
 
     def fit(self, X, y=None, **fit_params):
         return self
 
+def getClasses():
+    return ['18-24','25-34','34-44','45-54','55-64']
 
 def enrange(x):
     if(x>=18 and x<=24):

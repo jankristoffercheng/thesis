@@ -1,12 +1,12 @@
 from collections import Counter
 
-from sklearn.metrics import confusion_matrix
-
-from chaoticfolderofrissa.AgeRangeWrap import AgeRangeWrap
-from connection.Connection import Connection
-from sklearn.externals import joblib
 import pandas as pd
 from sklearn import metrics
+from sklearn.externals import joblib
+from sklearn.metrics import confusion_matrix
+
+from chaoticfolderofrissa.pipelinewraps.AgeRangeWrap import AgeRangeWrap
+from connection.Connection import Connection
 
 def getData():
     conn = Connection().getConnection()
