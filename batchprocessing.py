@@ -8,7 +8,7 @@ from prepareedsthesis import ConnectionFactory
 NORMALIZE_IN = 'C:/cygwin/normapi/in'
 NORMALIZE_OUT = 'C:/cygwin/normapi/normAPIout'
 HPOST_IN = 'C:/cygwin/SMTPOST/in'
-HPOST_OUT = ''
+HPOST_OUT = 'C:/cygwin/SMTPOST/HPOSTOut'
 
 #get from db idk how
 #remember to remove newlines
@@ -16,19 +16,24 @@ def getPosts():
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
-    query = 'SELECT Id, Text FROM Post;'
+    query = 'SELECT Id, Text FROM Post WHERE id = 00000000013;'
     cursor.execute(query)
 
     ids = []
-    posts = []
+    texts = []
 
     row = cursor.fetchone()
     while row is not None:
         ids.append(row['Id'])
-        posts.append(row['Text'])
+        text = row['Text']
+        text = str(text.encode('unicode-escape'))
+        text = text[2:-1]
+        text = text.replace('\\\\u', '\\u')
+        text = text.replace('\\\\U', '\\U')
+        texts.append(text)
         row = cursor.fetchone()
 
-    return {'ids': ids, 'posts': posts}
+    return {'ids': ids, 'texts': texts}
 
 def writePostsToFile(posts, filepath):
     target = open(filepath, 'w')
@@ -50,10 +55,10 @@ def updatePosts(ids, posts):
         conn = ConnectionFactory().getConnectionThesis()
         cursor = conn.cursor()
         for i in range(len(ids)):
-            cursor.execute('UPDATE Post SET PAOSDASDAS = ' + posts[i] + ' WHERE id = ' + ids[i])
+            cursor.execute('UPDATE Post SET FilPOS = %s WHERE id = %s', (posts[i], str(ids[i])))
     else:
         print('Cannot update posts')
-
+'''
 #get posts with ids
 ids = [5,2,7,4,3]
 posts = []
@@ -77,8 +82,18 @@ normapi.normalize_File(NORMALIZE_IN)
 
 #copy output of normalized text as hpost input
 shutil.copy2(NORMALIZE_OUT, HPOST_IN)
+'''
+posts = getPosts()
+ids = posts['ids']
+texts = posts['texts']
 
+writePostsToFile(texts, HPOST_IN)
+jvmPath = jpype.getDefaultJVMPath()
+jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
 rbpost = JPackage("rbpost").RBPOST
 rbpost.hPOST_File(HPOST_IN, '', '')
 
+posts = getPostsFromFile(HPOST_OUT)
+
 jpype.shutdownJVM()
+updatePosts(ids, posts)
