@@ -2,6 +2,7 @@ from collections import Counter
 
 import nltk
 
+from dao.PosDAO import PosDAO
 from utility.LanguageDetector import LanguageDetector, Language
 import jpype
 from jpype import *
@@ -29,39 +30,45 @@ class POSFeature:
                 self.nAdjectives += value
 
     def getPOSTag(self, text):
+
         tokenizedText = nltk.word_tokenize(text)
         posTagged = nltk.pos_tag(tokenizedText)
         engTags = [tag[1] for tag in posTagged]
 
-        #get filipino tags from tagalog tagger and map them to nltk tags
-        filTags = ['NN', 'NN', 'NN', 'UNK', 'JJ']
+        posDAO = PosDAO()
+        posMapDict = posDAO.getPOSMapping()
 
         jvmPath = jpype.getDefaultJVMPath()
         jpype.startJVM(jvmPath,"-Djava.class.path=dependencies/RBPOST.jar")
         rbpost = JPackage("rbpost").RBPOST
-        hello = rbpost.hPOST_Text(text)
 
-        print('HELLO: ' + hello)
+        hposTags = rbpost.hPOST_Text(' '.join(tokenizedText)).split()
 
+        filTags = [posMapDict.get(tag, tag) for tag in hposTags]
         jpype.shutdownJVM()
 
         #final tags
         posTags = []
 
         langDetector = LanguageDetector()
-        language = langDetector.getLanguage(text)
+
         for i in range(len(engTags)):
-            if(engTags[i] == filTags):
+            language = langDetector.getLanguage(posTagged[i][0])
+            print("text:",posTagged[i][0]," language: ",language)
+            if(engTags[i] == filTags[i]):
                 posTags.append(engTags[i])
-            elif(language == Language.FILIPINO and filTags[i] != self.UNKNOWN):
-                posTags.append(filTags[i])
+            elif(language == Language.FILIPINO):
+                if(filTags[i] != self.UNKNOWN):
+                    posTags.append(filTags[i])
+                elif(filTags[i][:2] == engTags[i][:2]):
+                    posTags.append(filTags[i][:2])
+
             else:
                 posTags.append(engTags[i])
 
         posTags = ['-' + tag for tag in posTags]
         self.sPOS = ''.join(posTags)[1:]
         self.sPOS = "'"+self.sPOS+"'"
-        print(language)
         print(engTags)
         print(filTags)
         print("POS:", self.sPOS)
