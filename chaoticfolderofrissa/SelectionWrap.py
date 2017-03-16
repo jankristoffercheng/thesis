@@ -1,6 +1,6 @@
 from pandas import DataFrame
 from sklearn.base import TransformerMixin
-
+import numpy as np
 
 class SelectionWrap(TransformerMixin):
 
@@ -18,4 +18,7 @@ class SelectionWrap(TransformerMixin):
         return self
 
     def transform(self, X, y=None, **transform_params):
-        return self.selection.transform(X)
+        data=self.selection.transform(X)
+        col= np.asarray(list(X.columns.values))[self.selection.get_support()]
+        result = DataFrame(data=data, columns=col)
+        return result

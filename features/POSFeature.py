@@ -48,7 +48,8 @@ class POSFeature:
         jpype.shutdownJVM()
 
         #final tags
-        posTags = []
+        posTags = engTags
+
 
         langDetector = LanguageDetector()
 
@@ -66,11 +67,10 @@ class POSFeature:
             else:
                 posTags.append(engTags[i])
 
+
         posTags = ['-' + tag for tag in posTags]
         self.sPOS = ''.join(posTags)[1:]
-        self.sPOS = "'"+self.sPOS+"'"
         print(engTags)
         print(filTags)
         print("POS:", self.sPOS)
-
 

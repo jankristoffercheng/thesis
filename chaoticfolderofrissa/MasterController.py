@@ -1,5 +1,6 @@
+import numpy
 from sklearn import svm, linear_model, metrics
-
+from sklearn.externals import joblib
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -13,7 +14,6 @@ from sklearn.tree import DecisionTreeClassifier
 
 from chaoticfolderofrissa.AgeRangeWrap import AgeRangeWrap
 from chaoticfolderofrissa.ItemSelector import ItemSelector
-from chaoticfolderofrissa.ModelWrap import ModelWrap
 from chaoticfolderofrissa.POSSeqWrap import POSSeqWrap
 from chaoticfolderofrissa.DataFrameWrap import DataFrameWrap
 from chaoticfolderofrissa.PostTimeWrap import PostTimeWrap
@@ -24,25 +24,92 @@ from connection.Connection import Connection
 def getData():
     conn = Connection().getConnection()
     cursor = conn.cursor()
-    sql = "SELECT P.Text, hour(P.PostTime) as Time, P.POS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id;"
+    sql = "Select count(*) as usernum from user"
     cursor.execute(sql)
-    row = cursor.fetchone()
-    features = []
-    results = []
-    while row is not None:
-        features.append([row['Text'],row['Time'], row['POS']])
-        results.append([row['Age'], row['Gender']])
-        row = cursor.fetchone()
-    return {'Features': features, 'Results': results}
+    usernum = int(cursor.fetchone()['usernum'])
+    print(usernum)
+
+    cursor.execute("Select Id from user limit "+ str(int(usernum*0.6)))
+    trainusers = [row['Id'] for row in cursor.fetchall()]
+    print(trainusers)
+
+    cursor.execute("Select Id from user limit 10000 offset " + str(int(usernum * 0.6)))
+    testusers = [row['Id'] for row in cursor.fetchall()]
+    print(testusers)
+
+    sql = "SELECT P.User, P.Text, hour(P.PostTime) as Time, P.POS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id and U.Id in (" + ",".join(map(str, trainusers)) + ")"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    traindata = {'Features': [[row['User'],row['Text'],row['Time'], row['POS']] for row in rows], 'Results': [[row['Age'], row['Gender']] for row in rows]}
+
+
+    sql = "SELECT P.User, P.Text, hour(P.PostTime) as Time, P.POS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id and U.Id in (" + ",".join(map(str, testusers)) + ")"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    testdata = {'Features': [[row['User'],row['Text'], row['Time'], row['POS']] for row in rows],
+                 'Results': [[row['Age'], row['Gender']] for row in rows]}
+
+    return {'Training': traindata,'Testing': testdata}
 
 
 class MasterController:
-    def __init__(self, features, results):
-        self.X=pd.DataFrame(features, columns=['Text', 'PostTime', 'POS'])
+    def __init__(self, features, results, tfeatures, tresults):
+        self.X=pd.DataFrame(features, columns=['User','Text', 'PostTime', 'POS'])
         self.y=pd.DataFrame(results, columns=['Age', 'Gender'])
+        self.tX=pd.DataFrame(tfeatures, columns=['User','Text', 'PostTime', 'POS'])
+        self.ty=pd.DataFrame(tresults, columns=['Age', 'Gender'])
 
+        print(self.X.shape)
         wrap = AgeRangeWrap()
         self.y['Age'] = wrap.fit_transform(self.y['Age'])
+        self.ty['Age'] = wrap.fit_transform(self.ty['Age'])
+
+    def getFeatures(self, select):
+
+         posseq = Pipeline([
+                        ('get_top', POSSeqWrap())
+                  ])
+
+         trial = posseq.fit_transform(self.X, self.y['Gender'])
+
+
+         features = FeatureUnion(
+                transformer_list=[
+                    ('possequence', Pipeline([
+                        ('get_top', POSSeqWrap()),
+                    ])),
+                    ('frequency', Pipeline([
+                        ('extract', ItemSelector('Text')),
+                        ('count', CountVectorizer()),
+                        ('tfidf', TfidfTransformer()),
+                        ('select', SelectionWrap(select))
+                    ])),
+                    ('time', Pipeline([
+                        ('extract', ItemSelector('PostTime')),
+                        ('enrange', PostTimeWrap()),
+                        ('vectorize', VectorizeWrap())
+                    ]))
+                ],
+                transformer_weights={
+                    'possequence': 1,
+                    'frequency': 1,
+                    'time': 1
+                }
+         )
+         # result = features.fit_transform(self.X, self.y['Gender'])
+
+         # numpy.savetxt("feature_train.csv", result.todense(), delimiter=',')
+         # coo = result.tocoo(copy=False)
+         #
+         # df = pd.DataFrame({'index': coo.row, 'col': coo.col, 'data': coo.data}
+         #                   )[['index', 'col', 'data']].sort_values(['index', 'col']
+         #                                                           ).reset_index(drop=True)
+         #
+         # print("train",df.shape)
+         # print(df)
+         # result = features.transform(self.tX)
+         # print("test", result.shape)
+         # print(result)
 
 
     def trainAgetoGenderStack(self, ageselect, agemodel, genselect, genmodel):
@@ -191,7 +258,7 @@ class MasterController:
         print('agecm', confusion_matrix(self.y['Age'], agedf))
         print('ageacc', metrics.accuracy_score(self.y['Age'], agedf))
 
-    def trainCombined(self, selection, model):
+    def trainCombined(self, selection, model, file):
         pipeline = Pipeline([
             ('features', FeatureUnion(
                 transformer_list=[
@@ -220,11 +287,18 @@ class MasterController:
         ])
 
         cm = pipeline.fit(self.X, self.y['Gender'])
+        s = joblib.dump(cm, "cm/combined/"+file+"_Gender.pkl")
         df =  pd.DataFrame(cm.predict(self.X))
         print('cm', confusion_matrix(self.y['Gender'], df))
         print('acc', metrics.accuracy_score(self.y['Gender'],df))
 
-    def trainParallel(self, ageselect, agemodel, genselect, genmodel):
+        cm = pipeline.fit(self.X, self.y['Age'])
+        s = joblib.dump(cm, "cm/combined/"+file+"_Age.pkl")
+        df =  pd.DataFrame(cm.predict(self.X))
+        print('cm', confusion_matrix(self.y['Age'], df))
+        print('acc', metrics.accuracy_score(self.y['Age'],df))
+
+    def trainParallel(self, ageselect, agemodel, genselect, genmodel, file):
         genpipeline = Pipeline([
             ('features', FeatureUnion(
                 transformer_list=[
@@ -253,6 +327,7 @@ class MasterController:
         ])
 
         gencm = genpipeline.fit(self.X, self.y['Gender'])
+        s = joblib.dump(gencm, "cm/parallel/"+file+"_Gen.pkl")
         gendf = pd.DataFrame(gencm.predict(self.X))
         print('agecm', confusion_matrix(self.y['Gender'], gendf))
         print('ageacc', metrics.accuracy_score(self.y['Gender'], gendf))
@@ -286,195 +361,10 @@ class MasterController:
 
         agecm = agepipeline.fit(self.X, self.y['Age'])
         agedf = pd.DataFrame(agecm.predict(self.X))
+        s = joblib.dump(agecm, "cm/parallel/"+file+"_Age.pkl")
         print('agecm', confusion_matrix(self.y['Age'], agedf))
         print('ageacc', metrics.accuracy_score(self.y['Age'], agedf))
 
 data = getData()
-ctr = MasterController(data['Features'],data['Results'])
-#ctr.trainAgetoGenderStack(SelectKBest(chi2, k=1000), MultinomialNB(),SelectKBest(chi2, k=1000), MultinomialNB())
-#ctr.trainGendertoAgeStack(SelectKBest(chi2, k=1000), MultinomialNB(),SelectKBest(chi2, k=1000), MultinomialNB())
-#ctr.trainCombined(SelectKBest(chi2, k=1000), MultinomialNB())
-ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), MultinomialNB(), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), MultinomialNB(), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-#
-#
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), svm.SVC(kernel='linear'), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-#
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), MultinomialNB(), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(chi2, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), SelectKBest(mutual_info_classif, k=1000), linear_model.Ridge(alpha=1.0))
-#
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), PCA(n_components=100), svm.SVC(kernel='linear'))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), PCA(n_components=100), DecisionTreeClassifier(criterion='entropy',min_samples_split=20, random_state=99))
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), PCA(n_components=100), MultinomialNB())
-# ctr.trainParallel(PCA(n_components=100), linear_model.Ridge(alpha=1.0), PCA(n_components=100), linear_model.Ridge(alpha=1.0))
+ctr = MasterController(data['Training']['Features'],data['Training']['Results'],data['Testing']['Features'],data['Testing']['Results'])
+ctr.getFeatures(SelectKBest(chi2, k=1000))
