@@ -8,7 +8,7 @@ class PostTimeWrap(TransformerMixin):
     def transform(self, X, **transform_params):
         hours = X.apply(enrange)
 
-        mlb = MultiLabelBinarizer()
+        mlb = MultiLabelBinarizer(classes=[0,1,2,3,4])
         temp = hours.apply(lambda x: [x])
         data = DataFrame(data=mlb.fit_transform(temp), columns=["Tim."+time for time in getClasses()])
         return data
