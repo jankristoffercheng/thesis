@@ -17,6 +17,7 @@ class ConnectionFactory:
 
 
 def addposts():
+    print("adding posts...")
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
@@ -47,8 +48,8 @@ def addposts():
 
 
                 try:
-                    cursor.execute('INSERT INTO Post(User, Text, PostTime, POS) VALUES (%s,%s,%s,%s)',
-                                   (id, i['text'], philver.strftime("%H:%M"), posproc.sPOS[1:-1]))
+                    cursor.execute('INSERT INTO Post(User, Text, PostTime, EngPOS) VALUES (%s,%s,%s,%s) ',
+                                   (id, i['text'], philver.strftime("%H:%M"), posproc.getEnglishPOS()))
                 except Exception as e:
                     print('fuuu', str(e))
 
@@ -81,5 +82,6 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 
-addusers(10)
-addposts()
+
+#addusers(10)
+#addposts()

@@ -1,6 +1,6 @@
 class Post:
-    def __init__(self, id, content, epos, tpos):
+    def __init__(self, id, content, epos, fpos):
         self.id = id
         self.epos = epos
-        self.tpos = tpos
+        self.fpos = fpos
         self.content = content

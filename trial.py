@@ -7,10 +7,14 @@ DetectorFactory.seed = 0
 print(detect_langs("Maglalagay sana ako ng caption na malalim kaso di ako artist."))
 print(detect_langs("Dahil puno na sa restaurant, mom, shoti, and I were asked to share a seat with a customer. Buti nalang ikaw kasama namin sa table. Nice seeing you Shayane."))
 print(detect_langs("asdfhu asdf;uih asdiufh asdui"))'''
+import jpype
+from jpype import *
+
 from sklearn.feature_extraction.text import CountVectorizer
 
 # from utility.NormalizeFilipino import NormalizeFilipino
 # from utility.PostCleaner import PostCleaner
+from model.Post import Post
 
 '''import langid
 
@@ -83,10 +87,26 @@ import nltk
 str = 'Dr. Smith is treating Mrs. Chucky'
 posTagger = POSFeature(str)'''
 
-str = 'Ayaw ko na to the max! Hello my master...pagod na ako shiz!'
-text = nltk.word_tokenize(str)
-print(nltk.pos_tag(text))
 
 from features.POSFeature import POSFeature
+str = 'Finally ! After ng xmas vacation nakita din kita . Love u always ! ! Miss you baby ! ! ! ! USERNAME URL'
 
-posTagger = POSFeature(str)
+
+
+posF = POSFeature(str)
+epos = posF.getEnglishPOS()
+
+jvmPath = jpype.getDefaultJVMPath()
+jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
+rbpost = JPackage("rbpost").RBPOST
+result = rbpost.hPOST_Text(str)
+
+tpos = '-'.join(result.split())
+posFeature = POSFeature(str)
+posFeature.populateMappingDictionary()
+posSample = Post(-1, str, epos, tpos)
+
+print("content:", str)
+print("epos:",epos)
+print("tpos:",tpos)
+print("combined:", posFeature.getPOSTag(posSample))

@@ -15,9 +15,28 @@ class POSFeature:
     def __init__(self, text):
         self.nVerbs = 0
         self.nAdjectives = 0
+        self.sText = text
         self.sPOS = ''
+        self.POSDao = PosDAO()
+        self.mapping = {}
+
+        #self.populateMappingDictionary()
+
         #self.getPOSCount(text)
-        self.getPOSTag(text)
+        #self.getPOSTag(text)
+
+    def populateMappingDictionary(self):
+        print("populating map dictionary...")
+        with open("mapping.txt", "r") as file_object:
+            for line in file_object:
+                splitline = line.split()
+                self.mapping[' '.join(splitline[1:])] = splitline[0]
+
+    def getEnglishPOS(self):
+        tokenizedText = nltk.word_tokenize(self.sText)
+        pos = nltk.pos_tag(tokenizedText)
+        pos = '-'.join([posTag[1] for posTag in pos])
+        return pos
 
     def getPOSCount(self, text):
         tokenizedText = nltk.word_tokenize(text)
@@ -29,58 +48,78 @@ class POSFeature:
             if key.startswith(self.ADJECTIVE):
                 self.nAdjectives += value
 
+
     def getPOSTag(self, post):
 
+        print("beginning to combine pos...")
         #assumptions: engPOS and filPOS are strings that contains POS tags sperated by -
         tokenizedText = nltk.word_tokenize(post.content)
 
         #step 1: split tweets/posts into sentences
         text = ' '.join(tokenizedText)
-        sentences = []
-        finalPOSTags = ""
-        posTags =[]
-        punctuations = ['.', '?', '!']
-        prevIndex = 0
-        for i in range(len(text)):
-            if text[i] in punctuations:
-                sentences.append(text[prevIndex:i+1].strip())
-                prevIndex = i+1
+        finalPOSTags = []
+        filTags =[]
 
         engTags = [tag for tag in post.epos.split("-")]
 
-        posDAO = PosDAO()
-        posMapDict = posDAO.getPOSMapping()
+        splitFPOS = post.fpos.split("-")
+        for i in range(len(splitFPOS)):
+            if(i != len(splitFPOS)-1):
 
-        filTags = [posMapDict.get(tag, tag) for tag in post.fpos.split("-")]
-
+                tag = splitFPOS[i] +" "+splitFPOS[i+1]
+                if (self.mapping.get(tag) != None): #check if compound tag is in the map
+                    i = i+1
+                    filTags.append(tag)
+                else:
+                    filTags.append(self.mapping.get(splitFPOS[i],splitFPOS[i]))
+            else :
+                filTags.append(self.mapping.get(splitFPOS[i], splitFPOS[i]))
 
         startIndex = 0
 
+        print("resulting mapped fil tags:", filTags)
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
-        for sentence in sentences:
 
+        for sentence in nltk.sent_tokenize(text):
             language = langDetector.getLanguage(sentence)
+            wordCount = sentence.split()
+
             if(language == Language.FILIPINO):
-                for startIndex in range(len(filTags)):
-                    finalPOSTags = finalPOSTags + "-" + filTags[startIndex]
+                for i in range(startIndex,len(wordCount) + startIndex):
+                    finalPOSTags.append(filTags[i])
 
             elif(language == Language.ENGLISH):
-                for startIndex in range(len(engTags)):
-                    finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
+                for i in range(startIndex,len(wordCount) + startIndex):
+                    finalPOSTags.append(engTags[i])
 
             else:
-                for startIndex in range(len(engTags)):
-                    if(engTags[startIndex] == filTags[startIndex]):
-                        finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
+                for i in range(startIndex,len(wordCount) + startIndex):
+
+                    if (engTags[i] == filTags[i]):
+                        finalPOSTags.append(engTags[i])
+
+                    elif (filTags[i] == 'UNK'):
+                        finalPOSTags.append(engTags[i])
+
+                    elif (filTags[i] == 'FW' and engTags[i] != 'FW'):
+                        finalPOSTags.append(engTags[i])
+
+                    elif (engTags[i] == 'FW' and filTags[i] != 'FW'):
+                        finalPOSTags.append(filTags[i])
+
                     elif (filTags[i][:2] == engTags[i][:2]):
-                        finalPOSTags = finalPOSTags + "-" + filTags[startIndex][:2]
+                        finalPOSTags.append(filTags[i][:2])
+
                     else:
-                        finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
+                        finalPOSTags.append(filTags[i])
 
-            startIndex = startIndex + len(sentence) - 1
+           # print("counter: ",counter)
+            startIndex = startIndex + len(wordCount)
+            print("finalPOSTag size:", len(finalPOSTags))
 
+        #self.posDAO.updateCombinedPOS(post.id, finalPOSTags)
         print(engTags)
         print(filTags)
-        print("POS:", finalPOSTags)
+        return '-'.join(finalPOSTags)
 

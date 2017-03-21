@@ -6,6 +6,14 @@ from model.Document import Document
 
 
 class PostsDAO:
+
+    def updateCombinedPOS(self, id, cmbPOS):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'UPDATE Post SET CmbPOS = '+cmbPOS+' WHERE id = '+id
+        #print(sql)
+        cursor.execute(sql)
+
     def addPost(self, username, text, hour, min):
         conn = Connection().getConnection()
         cursor = conn.cursor()

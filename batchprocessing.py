@@ -13,10 +13,12 @@ HPOST_OUT = 'C:/cygwin/SMTPOST/HPOSTOut'
 #get from db idk how
 #remember to remove newlines
 def getPosts():
+
+    print("getting posts...")
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
-    query = 'SELECT Id, Text FROM Post WHERE id = 00000000013;'
+    query = 'SELECT Id, Text FROM Post;'
     cursor.execute(query)
 
     ids = []
@@ -47,7 +49,7 @@ def getPostsFromFile(filepath):
     lines = target.readlines()
     posts = []
     for i in range(len(lines)):
-        posts.append(lines[i].rstrip('\n'))
+        posts.append('-'.join(lines[i].rstrip('\n').split()))
     return posts
 
 def updatePosts(ids, posts):
