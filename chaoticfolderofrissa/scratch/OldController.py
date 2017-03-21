@@ -1,55 +1,22 @@
-import numpy
-from sklearn import svm, linear_model, metrics
-from sklearn.externals import joblib
 import pandas as pd
-from sklearn.decomposition import PCA
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.feature_selection import mutual_info_classif
-from sklearn.metrics import confusion_matrix
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.tree import DecisionTreeClassifier
-
 from chaoticfolderofrissa.AgeRangeWrap import AgeRangeWrap
 from chaoticfolderofrissa.ItemSelector import ItemSelector
 from chaoticfolderofrissa.POSSeqWrap import POSSeqWrap
-from chaoticfolderofrissa.DataFrameWrap import DataFrameWrap
 from chaoticfolderofrissa.PostTimeWrap import PostTimeWrap
 from chaoticfolderofrissa.SelectionWrap import SelectionWrap
-from chaoticfolderofrissa.VectorizeWrap import VectorizeWrap
+from sklearn import metrics
+from sklearn.externals import joblib
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from sklearn.metrics import confusion_matrix
+from sklearn.pipeline import Pipeline, FeatureUnion
+
+from chaoticfolderofrissa.pipelinewraps.VectorizeWrap import VectorizeWrap
 from connection.Connection import Connection
 
-def getData():
-    conn = Connection().getConnection()
-    cursor = conn.cursor()
-    sql = "Select count(*) as usernum from user"
-    cursor.execute(sql)
-    usernum = int(cursor.fetchone()['usernum'])
-    print(usernum)
-
-    cursor.execute("Select Id from user limit "+ str(int(usernum*0.6)))
-    trainusers = [row['Id'] for row in cursor.fetchall()]
-    print(trainusers)
-
-    cursor.execute("Select Id from user limit 10000 offset " + str(int(usernum * 0.6)))
-    testusers = [row['Id'] for row in cursor.fetchall()]
-    print(testusers)
-
-    sql = "SELECT P.User, P.Text, hour(P.PostTime) as Time, P.POS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id and U.Id in (" + ",".join(map(str, trainusers)) + ")"
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    traindata = {'Features': [[row['User'],row['Text'],row['Time'], row['POS']] for row in rows], 'Results': [[row['Age'], row['Gender']] for row in rows]}
 
 
-    sql = "SELECT P.User, P.Text, hour(P.PostTime) as Time, P.POS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id and U.Id in (" + ",".join(map(str, testusers)) + ")"
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    testdata = {'Features': [[row['User'],row['Text'], row['Time'], row['POS']] for row in rows],
-                 'Results': [[row['Age'], row['Gender']] for row in rows]}
-
-    return {'Training': traindata,'Testing': testdata}
 
 
 class MasterController:
@@ -365,6 +332,6 @@ class MasterController:
         print('agecm', confusion_matrix(self.y['Age'], agedf))
         print('ageacc', metrics.accuracy_score(self.y['Age'], agedf))
 
-data = getData()
-ctr = MasterController(data['Training']['Features'],data['Training']['Results'],data['Testing']['Features'],data['Testing']['Results'])
-ctr.getFeatures(SelectKBest(chi2, k=1000))
+# data = getData()
+# ctr = MasterController(data['Training']['Features'],data['Training']['Results'],data['Testing']['Features'],data['Testing']['Results'])
+# ctr.getFeatures(SelectKBest(chi2, k=1000))

@@ -79,6 +79,14 @@ print(count_vect.vocabulary_.get(u'hello'))
 print(count_vect.vocabulary_.get(u'rissa'))
 '''
 import nltk
+'''from features.POSFeature import POSFeature
+str = 'Dr. Smith is treating Mrs. Chucky'
+posTagger = POSFeature(str)'''
+
+str = 'Ayaw ko na to the max! Hello my master...pagod na ako shiz!'
+text = nltk.word_tokenize(str)
+print(nltk.pos_tag(text))
+
 from features.POSFeature import POSFeature
-str = 'hello my name is awesome'
+
 posTagger = POSFeature(str)
