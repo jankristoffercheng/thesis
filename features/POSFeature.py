@@ -29,48 +29,58 @@ class POSFeature:
             if key.startswith(self.ADJECTIVE):
                 self.nAdjectives += value
 
-    def getPOSTag(self, text):
+    def getPOSTag(self, post):
 
-        tokenizedText = nltk.word_tokenize(text)
-        posTagged = nltk.pos_tag(tokenizedText)
-        engTags = [tag[1] for tag in posTagged]
+        #assumptions: engPOS and filPOS are strings that contains POS tags sperated by -
+        tokenizedText = nltk.word_tokenize(post.content)
+
+        #step 1: split tweets/posts into sentences
+        text = ' '.join(tokenizedText)
+        sentences = []
+        finalPOSTags = ""
+        posTags =[]
+        punctuations = ['.', '?', '!']
+        prevIndex = 0
+        for i in range(len(text)):
+            if text[i] in punctuations:
+                sentences.append(text[prevIndex:i+1].strip())
+                prevIndex = i+1
+
+        engTags = [tag for tag in post.epos.split("-")]
 
         posDAO = PosDAO()
         posMapDict = posDAO.getPOSMapping()
 
-        jvmPath = jpype.getDefaultJVMPath()
-        jpype.startJVM(jvmPath,"-Djava.class.path=dependencies/RBPOST.jar")
-        rbpost = JPackage("rbpost").RBPOST
-
-        hposTags = rbpost.hPOST_Text(' '.join(tokenizedText)).split()
-
-        filTags = [posMapDict.get(tag, tag) for tag in hposTags]
-        jpype.shutdownJVM()
-
-        #final tags
-        posTags = engTags
+        filTags = [posMapDict.get(tag, tag) for tag in post.fpos.split("-")]
 
 
+        startIndex = 0
+
+        #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
+        for sentence in sentences:
 
-        for i in range(len(engTags)):
-            language = langDetector.getLanguage(posTagged[i][0])
-            print("text:",posTagged[i][0]," language: ",language)
-            if(engTags[i] == filTags[i]):
-                posTags.append(engTags[i])
-            elif(language == Language.FILIPINO):
-                if(filTags[i] != self.UNKNOWN):
-                    posTags.append(filTags[i])
-                elif(filTags[i][:2] == engTags[i][:2]):
-                    posTags.append(filTags[i][:2])
+            language = langDetector.getLanguage(sentence)
+            if(language == Language.FILIPINO):
+                for startIndex in range(len(filTags)):
+                    finalPOSTags = finalPOSTags + "-" + filTags[startIndex]
+
+            elif(language == Language.ENGLISH):
+                for startIndex in range(len(engTags)):
+                    finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
 
             else:
-                posTags.append(engTags[i])
+                for startIndex in range(len(engTags)):
+                    if(engTags[startIndex] == filTags[startIndex]):
+                        finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
+                    elif (filTags[i][:2] == engTags[i][:2]):
+                        finalPOSTags = finalPOSTags + "-" + filTags[startIndex][:2]
+                    else:
+                        finalPOSTags = finalPOSTags + "-" + engTags[startIndex]
 
+            startIndex = startIndex + len(sentence) - 1
 
-        posTags = ['-' + tag for tag in posTags]
-        self.sPOS = ''.join(posTags)[1:]
         print(engTags)
         print(filTags)
-        print("POS:", self.sPOS)
+        print("POS:", finalPOSTags)
 
