@@ -89,12 +89,10 @@ posTagger = POSFeature(str)'''
 
 
 from features.POSFeature import POSFeature
-str = 'Finally ! After ng xmas vacation nakita din kita . Love u always ! ! Miss you baby ! ! ! ! USERNAME URL'
+str = 'You\'re my fire move on from the U . S . Election results #USElection2016'
 
-
-
-posF = POSFeature(str)
-epos = posF.getEnglishPOS()
+posFeature = POSFeature()
+epos = posFeature.getEnglishPOS(str)
 
 jvmPath = jpype.getDefaultJVMPath()
 jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
@@ -102,11 +100,14 @@ rbpost = JPackage("rbpost").RBPOST
 result = rbpost.hPOST_Text(str)
 
 tpos = '-'.join(result.split())
-posFeature = POSFeature(str)
+'''
+epos = 'J-NN-NN-VBD-NNS-V'
+tpos = 'VBTR-PRS-RBI-VBOF-PRS-PMS-UNK'''
+
 posFeature.populateMappingDictionary()
 posSample = Post(-1, str, epos, tpos)
 
 print("content:", str)
 print("epos:",epos)
 print("tpos:",tpos)
-print("combined:", posFeature.getPOSTag(posSample))
+print("combined:", posFeature.getCombinedPOSTag(posSample))

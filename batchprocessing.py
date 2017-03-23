@@ -32,6 +32,7 @@ def getPosts():
         text = text[2:-1]
         text = text.replace('\\\\u', '\\u')
         text = text.replace('\\\\U', '\\U')
+        text = ' '.join(nltk.word_tokenize(text))
         texts.append(text)
         row = cursor.fetchone()
 
@@ -85,7 +86,7 @@ normapi.normalize_File(NORMALIZE_IN)
 #copy output of normalized text as hpost input
 shutil.copy2(NORMALIZE_OUT, HPOST_IN)
 '''
-'''posts = getPosts()
+posts = getPosts()
 ids = posts['ids']
 texts = posts['texts']
 
@@ -98,9 +99,4 @@ rbpost.hPOST_File(HPOST_IN, '', '')
 posts = getPostsFromFile(HPOST_OUT)
 
 jpype.shutdownJVM()
-updatePosts(ids, posts)'''
-
-
-#combine the english and filipino POS
-posFeature = Pos
-getCombinedPOSTag
+updatePosts(ids, posts)

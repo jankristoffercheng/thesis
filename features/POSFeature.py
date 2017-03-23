@@ -1,11 +1,6 @@
 from collections import Counter
-
 import nltk
-
-from dao.PostsDAO import PostsDAO
 from utility.LanguageDetector import LanguageDetector, Language
-import jpype
-from jpype import *
 
 class POSFeature:
     VERB = 'VB'
@@ -16,9 +11,8 @@ class POSFeature:
         self.nVerbs = 0
         self.nAdjectives = 0
         self.sPOS = ''
-        self.postDAO = PostsDAO()
         self.mapping = {}
-
+        self.populateMappingDictionary()
         #self.populateMappingDictionary()
 
         #self.getPOSCount(text)
@@ -31,8 +25,9 @@ class POSFeature:
                 splitline = line.split()
                 self.mapping[' '.join(splitline[1:])] = splitline[0]
 
-    def getEnglishPOS(self):
-        tokenizedText = nltk.word_tokenize(self.sText)
+    def getEnglishPOS(self, text):
+        tokenizedText = nltk.word_tokenize(text)
+        print('tokenized:', tokenizedText)
         pos = nltk.pos_tag(tokenizedText)
         pos = '-'.join([posTag[1] for posTag in pos])
         return pos
@@ -76,24 +71,38 @@ class POSFeature:
 
         startIndex = 0
 
-       # print("resulting mapped fil tags:", filTags)
+        # print("resulting mapped fil tags:", filTags)
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
 
+        sentences = []
+        punctuations = ['.', '?', '!']
+        prevIndex = 0
+        i = 0
+        while i < len(post.content):
+            while post.content[i] not in punctuations:
+                sentence = sentences[prevIndex:i]
+                i += 1
+
         for sentence in nltk.sent_tokenize(text):
             language = langDetector.getLanguage(sentence)
-            wordCount = sentence.split()
+            wordCount = len(sentence.split())
 
+            print("langugae:", language)
+            print("startIndex:", startIndex, " wordCount:", wordCount , " sentence:", sentence )
             if(language == Language.FILIPINO):
-                for i in range(startIndex,len(wordCount) + startIndex):
+                for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(filTags[i])
 
             elif(language == Language.ENGLISH):
-                for i in range(startIndex,len(wordCount) + startIndex):
+                for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(engTags[i])
 
             else:
-                for i in range(startIndex,len(wordCount) + startIndex):
+                for i in range(startIndex, wordCount + startIndex):
+                    print("[",i,"] range:", wordCount +startIndex)
+                    print("engtag:",engTags[i])
+                    print("engtag:", engTags[i])
 
                     if (engTags[i] == filTags[i]):
                         finalPOSTags.append(engTags[i])
@@ -113,8 +122,8 @@ class POSFeature:
                     else:
                         finalPOSTags.append(filTags[i])
 
-            startIndex = startIndex + len(wordCount)
+            startIndex = startIndex + wordCount
 
-        self.postDAO.updateCombinedPOS(post.id, '-'.join(finalPOSTags))
+        return '-'.join(finalPOSTags)
 
 

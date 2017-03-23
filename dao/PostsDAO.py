@@ -3,16 +3,27 @@ import numpy as np
 from connection.Connection import Connection
 from features.POSFeature import POSFeature
 from model.Document import Document
+from model.Post import Post
 
 
 class PostsDAO:
 
+    def getPosts(self):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'SELECT Id, Text, EngPOS, FilPOS FROM post;'
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        posts = []
+        while row is not None:
+            posts.append(Post(row['Id'], row['Text'], row['EngPOS'], row['FilPOS']))
+            row = cursor.fetchone()
+        return posts
+
     def updateCombinedPOS(self, id, cmbPOS):
         conn = Connection().getConnection()
         cursor = conn.cursor()
-        sql = 'UPDATE Post SET CmbPOS = '+cmbPOS+' WHERE id = '+id
-        #print(sql)
-        cursor.execute(sql)
+        cursor.execute('Update Post SET CmbPOS = %s WHERE id = %s', (cmbPOS, str(id)))
 
     def addPost(self, username, text, hour, min):
         conn = Connection().getConnection()
