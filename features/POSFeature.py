@@ -2,7 +2,7 @@ from collections import Counter
 
 import nltk
 
-from dao.PosDAO import PosDAO
+from dao.PostsDAO import PostsDAO
 from utility.LanguageDetector import LanguageDetector, Language
 import jpype
 from jpype import *
@@ -12,12 +12,11 @@ class POSFeature:
     ADJECTIVE = 'JJ'
     UNKNOWN = 'UNK'
 
-    def __init__(self, text):
+    def __init__(self):
         self.nVerbs = 0
         self.nAdjectives = 0
-        self.sText = text
         self.sPOS = ''
-        self.POSDao = PosDAO()
+        self.postDAO = PostsDAO()
         self.mapping = {}
 
         #self.populateMappingDictionary()
@@ -49,9 +48,9 @@ class POSFeature:
                 self.nAdjectives += value
 
 
-    def getPOSTag(self, post):
+    def getCombinedPOSTag(self, post):
 
-        print("beginning to combine pos...")
+        print("combining pos...[",post.id,"]")
         #assumptions: engPOS and filPOS are strings that contains POS tags sperated by -
         tokenizedText = nltk.word_tokenize(post.content)
 
@@ -77,7 +76,7 @@ class POSFeature:
 
         startIndex = 0
 
-        print("resulting mapped fil tags:", filTags)
+       # print("resulting mapped fil tags:", filTags)
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
 
@@ -114,12 +113,8 @@ class POSFeature:
                     else:
                         finalPOSTags.append(filTags[i])
 
-           # print("counter: ",counter)
             startIndex = startIndex + len(wordCount)
-            print("finalPOSTag size:", len(finalPOSTags))
 
-        #self.posDAO.updateCombinedPOS(post.id, finalPOSTags)
-        print(engTags)
-        print(filTags)
-        return '-'.join(finalPOSTags)
+        self.postDAO.updateCombinedPOS(post.id, '-'.join(finalPOSTags))
+
 

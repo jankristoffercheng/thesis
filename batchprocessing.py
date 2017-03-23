@@ -85,7 +85,7 @@ normapi.normalize_File(NORMALIZE_IN)
 #copy output of normalized text as hpost input
 shutil.copy2(NORMALIZE_OUT, HPOST_IN)
 '''
-posts = getPosts()
+'''posts = getPosts()
 ids = posts['ids']
 texts = posts['texts']
 
@@ -98,4 +98,9 @@ rbpost.hPOST_File(HPOST_IN, '', '')
 posts = getPostsFromFile(HPOST_OUT)
 
 jpype.shutdownJVM()
-updatePosts(ids, posts)
+updatePosts(ids, posts)'''
+
+
+#combine the english and filipino POS
+posFeature = Pos
+getCombinedPOSTag
