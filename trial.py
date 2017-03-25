@@ -88,7 +88,7 @@ str = 'Dr. Smith is treating Mrs. Chucky'
 posTagger = POSFeature(str)'''
 
 
-from features.POSFeature import POSFeature
+'''from features.POSFeature import POSFeature
 str = 'You\'re my fire move on from the U . S . Election results #USElection2016'
 
 posFeature = POSFeature()
@@ -99,15 +99,19 @@ jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies
 rbpost = JPackage("rbpost").RBPOST
 result = rbpost.hPOST_Text(str)
 
-tpos = '-'.join(result.split())
+tpos = '-'.join(result.split())'''
 '''
 epos = 'J-NN-NN-VBD-NNS-V'
 tpos = 'VBTR-PRS-RBI-VBOF-PRS-PMS-UNK'''
 
-posFeature.populateMappingDictionary()
+'''posFeature.populateMappingDictionary()
 posSample = Post(-1, str, epos, tpos)
 
 print("content:", str)
 print("epos:",epos)
 print("tpos:",tpos)
-print("combined:", posFeature.getCombinedPOSTag(posSample))
+print("combined:", posFeature.getCombinedPOSTag(posSample))'''
+
+from features.POSFeature import POSFeature
+
+print(POSFeature().getEnglishPOS("I can't believe you're here, Mrs. Cheng's cat!"))

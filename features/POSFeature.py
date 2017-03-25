@@ -1,4 +1,7 @@
 from collections import Counter
+
+import jpype
+from jpype import *
 import nltk
 from utility.LanguageDetector import LanguageDetector, Language
 
@@ -26,7 +29,14 @@ class POSFeature:
                 self.mapping[' '.join(splitline[1:])] = splitline[0]
 
     def getEnglishPOS(self, text):
-        tokenizedText = nltk.word_tokenize(text)
+        jvmPath = jpype.getDefaultJVMPath()
+        jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
+        rbpost = JPackage("rbpost").RBPOST
+
+        result = rbpost.tokenizer_Text(text)
+        tokenizedText = result.split(" ")
+        jpype.shutdownJVM()
+        #tokenizedText = nltk.word_tokenize(text)
         print('tokenized:', tokenizedText)
         pos = nltk.pos_tag(tokenizedText)
         pos = '-'.join([posTag[1] for posTag in pos])
