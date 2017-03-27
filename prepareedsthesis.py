@@ -5,6 +5,9 @@ import pymysql
 import json
 
 import pytz
+import nltk
+import re
+
 from dateutil.parser import parse
 
 from features.POSFeature import POSFeature
@@ -29,7 +32,6 @@ def addposts():
         data = json.load(data_file)
 
     philtz = pytz.timezone("Asia/Manila")
-    posFeature = POSFeature()
 
     for i in data:
 
@@ -45,9 +47,17 @@ def addposts():
                 row = cursor.fetchone()
                 id = int(row['Id'])
 
+                tokenizedPost = nltk.word_tokenize(i['text'])
+
+                postContent = ' '.join(tokenizedPost)
+                postContent = re.sub(r'\s([?.!"](?:\s|$))', r'\1', postContent)
+
+                engPOS = nltk.pos_tag(tokenizedPost)
+                engPOS = '-'.join([posTag[1] for posTag in engPOS])
+
                 try:
                     cursor.execute('INSERT INTO Post(User, Text, PostTime, EngPOS) VALUES (%s,%s,%s,%s) ',
-                                   (id, i['text'], philver.strftime("%H:%M"), posFeature.getEnglishPOS(i['text'])))
+                                   (id, postContent, philver.strftime("%H:%M"), engPOS))
                 except Exception as e:
                     print('fuuu', str(e))
 
@@ -78,3 +88,7 @@ def fixjson():
     with fileinput.FileInput('edsthesis_data.json', inplace=True, backup='.bak') as file:
         for line in file:
             print(line.replace('}{', '},{'), end='')
+
+#fixjson()
+#addusers(10)
+#addposts()

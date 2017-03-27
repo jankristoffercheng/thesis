@@ -88,9 +88,16 @@ str = 'Dr. Smith is treating Mrs. Chucky'
 posTagger = POSFeature(str)'''
 
 
-'''from features.POSFeature import POSFeature
-str = 'You\'re my fire move on from the U . S . Election results #USElection2016'
+from features.POSFeature import POSFeature
+import re
+str = 'You\'re my fire move on from the this time onwards . Totoo ba ito Mrs . Villanueva ? U . S . Election results #USElection2016. Bobby\'s bag'
+#email_cleaner = re.compile(r'(\\b([A-Za-z])\\ .)',flags=re.MULTILINE)
 
+str = re.sub(r'\s([?.!"](?:\s|$))', r'\1', str)
+print("Str:", str)
+'''str = ' '.join(nltk.word_tokenize(str))
+
+print("string tokenized: ",str)
 posFeature = POSFeature()
 epos = posFeature.getEnglishPOS(str)
 
@@ -98,20 +105,19 @@ jvmPath = jpype.getDefaultJVMPath()
 jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
 rbpost = JPackage("rbpost").RBPOST
 result = rbpost.hPOST_Text(str)
+print("result:", result)
+tpos = '-'.join(result.split())
 
-tpos = '-'.join(result.split())'''
-'''
-epos = 'J-NN-NN-VBD-NNS-V'
-tpos = 'VBTR-PRS-RBI-VBOF-PRS-PMS-UNK'''
+print("epos:",epos)
+print("tpos:",tpos)
 
-'''posFeature.populateMappingDictionary()
+posFeature.populateMappingDictionary()
 posSample = Post(-1, str, epos, tpos)
 
 print("content:", str)
-print("epos:",epos)
-print("tpos:",tpos)
+
 print("combined:", posFeature.getCombinedPOSTag(posSample))'''
 
-from features.POSFeature import POSFeature
+'''from features.POSFeature import POSFeature
 
-print(POSFeature().getEnglishPOS("I can't believe you're here, Mrs. Cheng's cat!"))
+print(POSFeature().getEnglishPOS("I can't believe you're here, Mrs. Cheng's cat!"))'''

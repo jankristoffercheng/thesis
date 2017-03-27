@@ -3,6 +3,7 @@ from collections import Counter
 import jpype
 from jpype import *
 import nltk
+from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 from utility.LanguageDetector import LanguageDetector, Language
 
 class POSFeature:
@@ -15,7 +16,7 @@ class POSFeature:
         self.nAdjectives = 0
         self.sPOS = ''
         self.mapping = {}
-        self.populateMappingDictionary()
+        #self.populateMappingDictionary()
         #self.populateMappingDictionary()
 
         #self.getPOSCount(text)
@@ -29,14 +30,16 @@ class POSFeature:
                 self.mapping[' '.join(splitline[1:])] = splitline[0]
 
     def getEnglishPOS(self, text):
-        jvmPath = jpype.getDefaultJVMPath()
+        '''jvmPath = jpype.getDefaultJVMPath()
         jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
         rbpost = JPackage("rbpost").RBPOST
 
         result = rbpost.tokenizer_Text(text)
         tokenizedText = result.split(" ")
-        jpype.shutdownJVM()
-        #tokenizedText = nltk.word_tokenize(text)
+        jpype.shutdownJVM()'''
+
+
+        tokenizedText = nltk.word_tokenize(text)
         print('tokenized:', tokenizedText)
         pos = nltk.pos_tag(tokenizedText)
         pos = '-'.join([posTag[1] for posTag in pos])
@@ -85,7 +88,7 @@ class POSFeature:
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
 
-        sentences = []
+        ''' sentences = []
         punctuations = ['.', '?', '!']
         prevIndex = 0
         i = 0
@@ -93,13 +96,14 @@ class POSFeature:
             while post.content[i] not in punctuations:
                 sentence = sentences[prevIndex:i]
                 i += 1
+            print("sentence:",sentence)'''
 
-        for sentence in nltk.sent_tokenize(text):
+        for sentence in nltk.sent_tokenize(post.content):
             language = langDetector.getLanguage(sentence)
             wordCount = len(sentence.split())
 
-            print("langugae:", language)
-            print("startIndex:", startIndex, " wordCount:", wordCount , " sentence:", sentence )
+            #print("language:", language , " sentence: ", sentence)
+            #print("startIndex:", startIndex, " wordCount:", wordCount , " sentence:", sentence)
             if(language == Language.FILIPINO):
                 for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(filTags[i])
@@ -110,9 +114,7 @@ class POSFeature:
 
             else:
                 for i in range(startIndex, wordCount + startIndex):
-                    print("[",i,"] range:", wordCount +startIndex)
-                    print("engtag:",engTags[i])
-                    print("engtag:", engTags[i])
+                  #  print("[",i,"] range:", wordCount +startIndex)
 
                     if (engTags[i] == filTags[i]):
                         finalPOSTags.append(engTags[i])

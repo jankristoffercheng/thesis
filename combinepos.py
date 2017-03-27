@@ -3,6 +3,7 @@ from features.POSFeature import POSFeature
 
 postsDAO = PostsDAO()
 posFeature = POSFeature()
+posFeature.populateMappingDictionary()
 posts = postsDAO.getPosts()
 
 for post in posts:
