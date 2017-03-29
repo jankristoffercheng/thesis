@@ -11,6 +11,7 @@ import re
 from dateutil.parser import parse
 
 from features.POSFeature import POSFeature
+from utility.PostCleaner import PostCleaner
 
 
 class ConnectionFactory:
@@ -32,7 +33,7 @@ def addposts():
         data = json.load(data_file)
 
     philtz = pytz.timezone("Asia/Manila")
-
+    postCleaner = PostCleaner()
     for i in data:
 
         query = 'Select * from User where Username = %s'
@@ -50,7 +51,7 @@ def addposts():
                 tokenizedPost = nltk.word_tokenize(i['text'])
 
                 postContent = ' '.join(tokenizedPost)
-                postContent = re.sub(r'\s([?.!"](?:\s|$))', r'\1', postContent)
+                postContent = postCleaner.fixAcronymSpaces(postContent)
 
                 engPOS = nltk.pos_tag(tokenizedPost)
                 engPOS = '-'.join([posTag[1] for posTag in engPOS])
@@ -90,5 +91,5 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 #fixjson()
-#addusers(10)
+#addusers(50)
 #addposts()

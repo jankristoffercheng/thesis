@@ -58,7 +58,7 @@ class POSFeature:
 
     def getCombinedPOSTag(self, post):
 
-        print("combining pos...[",post.id,"]")
+        #print("combining pos...[",post.id,"]")
         #assumptions: engPOS and filPOS are strings that contains POS tags sperated by -
         tokenizedText = nltk.word_tokenize(post.content)
 

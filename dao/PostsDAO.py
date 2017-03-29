@@ -8,10 +8,12 @@ from model.Post import Post
 
 class PostsDAO:
 
-    def getPosts(self):
+    def getPosts(self, id = None):
         conn = Connection().getConnection()
         cursor = conn.cursor()
-        sql = 'SELECT Id, Text, EngPOS, FilPOS FROM post;'
+        sql = 'SELECT Id, Text, EngPOS, FilPOS FROM post'
+        if id != None:
+            sql += ' WHERE id >= ' + str(id)
         cursor.execute(sql)
         row = cursor.fetchone()
         posts = []

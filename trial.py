@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 # from utility.NormalizeFilipino import NormalizeFilipino
 # from utility.PostCleaner import PostCleaner
 from model.Post import Post
+from utility.PostCleaner import PostCleaner
 
 '''import langid
 
@@ -90,12 +91,12 @@ posTagger = POSFeature(str)'''
 
 from features.POSFeature import POSFeature
 import re
-str = 'You\'re my fire move on from the this time onwards . Totoo ba ito Mrs . Villanueva ? U . S . Election results #USElection2016. Bobby\'s bag'
+str = 'USERNAME pero yung picture na yun di mo dinelete :^)'
 #email_cleaner = re.compile(r'(\\b([A-Za-z])\\ .)',flags=re.MULTILINE)
 
 str = re.sub(r'\s([?.!"](?:\s|$))', r'\1', str)
 print("Str:", str)
-'''str = ' '.join(nltk.word_tokenize(str))
+str = ' '.join(nltk.word_tokenize(str))
 
 print("string tokenized: ",str)
 posFeature = POSFeature()
@@ -116,8 +117,10 @@ posSample = Post(-1, str, epos, tpos)
 
 print("content:", str)
 
-print("combined:", posFeature.getCombinedPOSTag(posSample))'''
+print("combined:", posFeature.getCombinedPOSTag(posSample))
 
 '''from features.POSFeature import POSFeature
 
 print(POSFeature().getEnglishPOS("I can't believe you're here, Mrs. Cheng's cat!"))'''
+
+
