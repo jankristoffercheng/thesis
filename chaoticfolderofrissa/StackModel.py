@@ -1,13 +1,16 @@
 from collections import Counter
 
-from sklearn import metrics
+from sklearn import metrics, svm
 from sklearn.externals import joblib
+from sklearn.linear_model import Ridge
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GroupKFold
 import pandas as pd
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.tree import DecisionTreeClassifier
 
-from chaoticfolderofrissa.pipelinewraps.AgeRangeWrap import AgeRangeWrap
-from chaoticfolderofrissa.pipelinewraps.GenderWrap import GenderWrap
+from chaoticfolderofrissa.pipelinewraps.StackAgeRangeWrap import StackAgeRangeWrap
+from chaoticfolderofrissa.pipelinewraps.StackGenderWrap import StackGenderWrap
 
 
 class StackModel:
@@ -89,17 +92,24 @@ class StackModel:
         root_testing = [item for sublist in root_testing for item in sublist]
 
         if (self.root.type == "Age"):
-            agewrap = AgeRangeWrap()
+            agewrap = StackAgeRangeWrap()
             root_train = agewrap.transform(pd.Series(root_training))
         else:
-            genwrap = GenderWrap()
+            genwrap = StackGenderWrap()
             root_train = genwrap.transform(pd.Series(root_training))
 
         self.X = pd.concat([self.X, root_train], axis=1)
 
         for ind, train_index, test_index in zip(range(len(self.train_index)), self.train_index, self.test_index):
 
-            model = modelType()
+            if (modelType is svm.SVC):
+                model = modelType(kernel='linear')
+            elif (modelType is MultinomialNB):
+                model = modelType()
+            elif (modelType is Ridge):
+                model = modelType(alpha=1.0)
+            elif (modelType is DecisionTreeClassifier):
+                model = modelType(criterion='entropy', min_samples_split=20, random_state=99)
             model.fit(self.X.iloc[train_index], self.y.iloc[train_index])
 
             self.models.append(model)

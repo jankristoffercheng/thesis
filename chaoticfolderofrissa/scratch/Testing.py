@@ -5,7 +5,7 @@ from sklearn import metrics
 from sklearn.externals import joblib
 from sklearn.metrics import confusion_matrix
 
-from chaoticfolderofrissa.pipelinewraps.AgeRangeWrap import AgeRangeWrap
+from chaoticfolderofrissa.pipelinewraps.StackAgeRangeWrap import AgeRangeWrap
 from connection.Connection import Connection
 
 def getData():

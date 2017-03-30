@@ -3,13 +3,17 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MultiLabelBinarizer
 
 
-class GenderWrap(TransformerMixin):
+class StackGenderWrap(TransformerMixin):
 
     def transform(self, X, **transform_params):
 
-        gen = X.apply(enrange)
+        # gen = X.apply(enrange)
 
-        return gen
+        mlb = MultiLabelBinarizer(classes=[0,1])
+        temp = X.apply(lambda x: [x])
+        data = DataFrame(data=mlb.fit_transform(temp), columns=["Stk." + gender for gender in getClasses()])
+
+        return data
 
     def fit(self, X, y=None, **fit_params):
         return self

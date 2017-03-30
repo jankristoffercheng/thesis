@@ -9,8 +9,13 @@ def v(verbose, text):
     if verbose:
         print(text)
 
+
+server = "https://app.receptiviti.com"
+api_key = "58aef3b284e37505c2bc912d"
+api_secret = "MxHkthlTnVCT8etCHBf9p8mB9vMM9FMjjdA0PJM9EGk"
+
 class Receptiviti():
-    def __init__(self, server, api_key, api_secret, verbose=False):
+    def __init__(self,verbose=False):
         """
         initialise a Receptiviti object
         :type server: str
@@ -99,10 +104,7 @@ class Receptiviti():
         return self.get_profile(person_id)["communication_recommendation"]
 
 def get_liwc(content):
-    server = "https://app.receptiviti.com"
-    key = "58aef3b284e37505c2bc912d"
-    secret = "MxHkthlTnVCT8etCHBf9p8mB9vMM9FMjjdA0PJM9EGk"
-    rtvi = Receptiviti(server, key, secret)
+    rtvi = Receptiviti()
     person_name = str(uuid.uuid4()).replace("-","")
     person_id = rtvi.create_person(person_name)
     rtvi.add_content(person_id,content)
@@ -113,10 +115,7 @@ def get_liwc(content):
     return liwc
 
 def get_receptivity(content):
-    server = "https://app.receptiviti.com"
-    key = "58aef3b284e37505c2bc912d"
-    secret = "MxHkthlTnVCT8etCHBf9p8mB9vMM9FMjjdA0PJM9EGk"
-    rtvi = Receptiviti(server, key, secret)
+    rtvi = Receptiviti()
     person_name = str(uuid.uuid4()).replace("-","")
     person_id = rtvi.create_person(person_name)
     rtvi.add_content(person_id,content)
@@ -127,17 +126,10 @@ def get_receptivity(content):
     return receptiviti
 
 def get_all(content):
-    server = "https://app.receptiviti.com"
-    key = "58aef3b284e37505c2bc912d"
-    secret = "MxHkthlTnVCT8etCHBf9p8mB9vMM9FMjjdA0PJM9EGk"
-    rtvi = Receptiviti(server, key, secret)
+    rtvi = Receptiviti()
     person_name = str(uuid.uuid4()).replace("-","")
     person_id = rtvi.create_person(person_name)
     rtvi.add_content(person_id,content)
     profile = rtvi.get_profile(person_id)
 
     return profile
-
-
-
-print(get_liwc("hey"))

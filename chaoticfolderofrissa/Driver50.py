@@ -8,15 +8,14 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn import svm
 import pandas as pd
+import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 
 from chaoticfolderofrissa.DOM import DOM
 from chaoticfolderofrissa.Feature import Feature
 from chaoticfolderofrissa.RootModel import RootModel
 from chaoticfolderofrissa.StackModel import StackModel
-from chaoticfolderofrissa.pipelinewraps.AgeRangeWrap import AgeRangeWrap
 from chaoticfolderofrissa.pipelinewraps.CountWrap import CountWrap
-from chaoticfolderofrissa.pipelinewraps.GenderWrap import GenderWrap
 from chaoticfolderofrissa.pipelinewraps.ItemSelector import ItemSelector
 from chaoticfolderofrissa.pipelinewraps.LIWCWrap import LIWCWrap
 from chaoticfolderofrissa.pipelinewraps.POSSeqWrap import POSSeqWrap
@@ -25,26 +24,16 @@ from chaoticfolderofrissa.pipelinewraps.TFIDFWrap import TFIDFWrap
 
 
 ##### Generate files for features
+from features.Selection import Selection
+from features.TFIDF import TFIDF
 
 
 def prepareFeatures(X , y):
     # posSeqPipeline = Pipeline([
     #                         ('get_top', POSSeqWrap())
     #                   ])
-    #
-    # posSeqFeatures = posSeqPipeline.fit_transform(X)
-    # posSeqFeatures.to_csv('data/posSequence_features.csv')
-    y['Gender'] = GenderWrap().fit_transform(y['Gender'])
-    y['Age'] = AgeRangeWrap().fit_transform(y['Age'])
 
-    frequencyPipeline = Pipeline([
-                            ('extract', ItemSelector('Text')),
-                            ('count', CountWrap()),
-                            ('tfidf', TFIDFWrap())
-                        ])
-
-    frequencyFeatures = frequencyPipeline.fit_transform(X)
-    frequencyFeatures.to_csv('data/frequency_features.csv')
+    posSeqFeatures = pd.read_csv("data/posSequence_features.csv", index_col=0)
 
     timePipeline = Pipeline([
                             ('extract', ItemSelector('PostTime')),
@@ -52,7 +41,31 @@ def prepareFeatures(X , y):
                         ])
 
     timeFeatures = timePipeline.fit_transform(X)
-    timeFeatures.to_csv('data/time_features.csv')
+
+    liwcFeatures = pd.read_csv("data/liwc_features.csv", index_col=0)
+
+    tfidf = TFIDF()
+    freq = tfidf.get_training_TFIDF(X['Text'])
+    for type in ['Gender', 'Age', 'Both']:
+        if(type!='Both'):
+            target = y[type]
+        else:
+            target = y['Gender'].map(str) + y['Age'].map(str)
+
+        sel, col = Selection().featureSelectChi2(1000, freq, target)
+        result = pd.DataFrame(data=sel.todense(), columns=np.asarray(tfidf.getFeatureNames())[col])
+        results = pd.concat([X, y, timeFeatures,  posSeqFeatures, result, liwcFeatures], axis=1)
+        results.to_csv('data/features_chi2_'+type+'.csv')
+
+        sel = Selection().featureExtractSVD(1000, freq, target)
+        result = pd.DataFrame(data=sel)
+        results = pd.concat([X, y, timeFeatures, posSeqFeatures, result, liwcFeatures], axis=1)
+        results.to_csv('data/features_svd_' + type + '.csv')
+
+        sel, col = Selection().featureSelectMutualClassif(1000, freq, target)
+        result = pd.DataFrame(data=sel.todense(), columns=np.asarray(tfidf.getFeatureNames())[col])
+        results = pd.concat([X, y, timeFeatures, posSeqFeatures, result, liwcFeatures], axis=1)
+        results.to_csv('data/features_mi_' + type + '.csv')
 
 def dimensionReduction():
     feature=Feature()
@@ -78,21 +91,21 @@ def dimensionReduction():
     gen_data.to_csv('data/features_mi_both.csv')
 
 #1. Prepare features
-X, y = DOM().getData()
-prepareFeatures(X, y)
+# X, y = DOM().getData()
+# prepareFeatures(X, y)
 
 #2. Dimension Reduction
 # dimensionReduction()
 
 #2. kFold for Parallel
 # age_data = pd.read_csv("data/features_chi2_age.csv", index_col=0, encoding='latin1')
-# age_model = RootModel(data=age_data, type='Age', modelType=DecisionTreeClassifier)
+# age_model = RootModel(data=age_data, type='Age', modelType=MultinomialNB)
 # train_results, test_results = age_model.evaluateKfold()
 # print(train_results)
 # print(test_results)
 #
-# gen_data = pd.read_csv("data/features_mi_gender.csv", index_col=0, encoding='latin1')
-# gen_model = RootModel(data=gen_data, type='Gender', modelType=RidgeClassifier)
+# gen_data = pd.read_csv("data/features_mi_Gender.csv", index_col=0, encoding='latin1')
+# gen_model = RootModel(data=gen_data, type='Gender', modelType=Ridge)
 # train_results, test_results = gen_model.evaluateKfold()
 # print(train_results)
 # print(test_results)

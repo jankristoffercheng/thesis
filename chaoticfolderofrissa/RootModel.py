@@ -2,9 +2,15 @@ from collections import Counter
 
 from sklearn import metrics
 from sklearn.externals import joblib
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GroupKFold
 import pandas as pd
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import svm
+
 
 class RootModel:
 
@@ -84,7 +90,15 @@ class RootModel:
     def __kFold(self, modelType):
         self.models = []
         for train_index, test_index in zip(self.train_index, self.test_index):
-            model = modelType()
+            if(modelType is svm.SVC):
+                model = modelType(kernel='linear')
+            elif(modelType is MultinomialNB):
+                model = modelType()
+            elif(modelType is Ridge):
+                model = modelType(alpha=1.0)
+            elif(modelType is DecisionTreeClassifier):
+                model = modelType(criterion='entropy',min_samples_split=20, random_state=99)
+
             model.fit(self.X.iloc[train_index], self.y.iloc[train_index])
 
             self.models.append(model)

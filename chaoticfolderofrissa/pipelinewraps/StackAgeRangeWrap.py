@@ -3,13 +3,17 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MultiLabelBinarizer
 
 
-class AgeRangeWrap(TransformerMixin):
+class StackAgeRangeWrap(TransformerMixin):
 
     def transform(self, X, **transform_params):
 
-        agerange = X.apply(enrange)
+        # agerange = X.apply(enrange)
 
-        return agerange
+        mlb = MultiLabelBinarizer(classes=[0,1,2,3,4])
+        temp = X.apply(lambda x: [x])
+        data = DataFrame(data=mlb.fit_transform(temp), columns=["Stk." + age for age in getClasses()])
+
+        return data
 
     def fit(self, X, y=None, **fit_params):
         return self
