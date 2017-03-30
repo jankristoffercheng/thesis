@@ -15,7 +15,9 @@ from chaoticfolderofrissa.DOM import DOM
 from chaoticfolderofrissa.Feature import Feature
 from chaoticfolderofrissa.RootModel import RootModel
 from chaoticfolderofrissa.StackModel import StackModel
+from chaoticfolderofrissa.pipelinewraps.AgeRangeWrap import AgeRangeWrap
 from chaoticfolderofrissa.pipelinewraps.CountWrap import CountWrap
+from chaoticfolderofrissa.pipelinewraps.GenderWrap import GenderWrap
 from chaoticfolderofrissa.pipelinewraps.ItemSelector import ItemSelector
 from chaoticfolderofrissa.pipelinewraps.LIWCWrap import LIWCWrap
 from chaoticfolderofrissa.pipelinewraps.POSSeqWrap import POSSeqWrap
@@ -29,6 +31,7 @@ from features.TFIDF import TFIDF
 
 
 def prepareFeatures(X , y):
+
     # posSeqPipeline = Pipeline([
     #                         ('get_top', POSSeqWrap())
     #                   ])
@@ -92,9 +95,16 @@ def dimensionReduction():
 
 def evaluate(file):
     age_data = pd.read_csv(file+"Age.csv", index_col=0, encoding='latin1')
+    age_data['Age']= AgeRangeWrap().fit_transform(age_data['Age'])
+    age_data['Gender']= GenderWrap().fit_transform(age_data['Gender'])
     gen_data = pd.read_csv(file+"Gender.csv", index_col=0, encoding='latin1')
+    gen_data['Age']= AgeRangeWrap().fit_transform(gen_data['Age'])
+    gen_data['Gender']= GenderWrap().fit_transform(gen_data['Gender'])
     both_data = pd.read_csv(file+"Both.csv", index_col=0, encoding='latin1')
+    both_data['Age']= AgeRangeWrap().fit_transform(both_data['Age'])
+    both_data['Gender']= GenderWrap().fit_transform(both_data['Gender'])
 
+    print("done")
     age_model = RootModel(data=age_data, type='Age', modelType=DecisionTreeClassifier)
     train_results, test_results = age_model.evaluateKfold()
     print(train_results)
@@ -115,15 +125,15 @@ def evaluate(file):
     print(train_results)
     print(test_results)
 
-    # both_model = RootModel(data=both_data, type='Gender', modelType=DecisionTreeClassifier)
-    # train_results, test_results = both_model.evaluateKfold()
-    # print(train_results)
-    # print(test_results)
-    #
-    # both_model = RootModel(data=both_data, type='Age', modelType=DecisionTreeClassifier)
-    # train_results, test_results = both_model.evaluateKfold()
-    # print(train_results)
-    # print(test_results)
+    both_model = RootModel(data=both_data, type='Gender', modelType=DecisionTreeClassifier)
+    train_results, test_results = both_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
+
+    both_model = RootModel(data=both_data, type='Age', modelType=DecisionTreeClassifier)
+    train_results, test_results = both_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
 
 #1. Prepare features
 # X, y = DOM().getData()
@@ -134,7 +144,7 @@ def evaluate(file):
 
 #2. kFold for Parallel
 
-evaluate("data/features_chi2_")
+evaluate("data/features_mi_")
 
 # age_data = pd.read_csv("data/features_chi2_age.csv", index_col=0, encoding='latin1')
 # age_model = RootModel(data=age_data, type='Age', modelType=MultinomialNB)
