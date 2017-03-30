@@ -1,9 +1,11 @@
+import re
 import nltk
 import jpype
 from jpype import *
 import shutil
 
 from prepareedsthesis import ConnectionFactory
+from utility.PostCleaner import PostCleaner
 
 NORMALIZE_IN = 'C:/cygwin/normapi/in'
 NORMALIZE_OUT = 'C:/cygwin/normapi/normAPIout'
@@ -13,23 +15,30 @@ HPOST_OUT = 'C:/cygwin/SMTPOST/HPOSTOut'
 #get from db idk how
 #remember to remove newlines
 def getPosts():
+
+    print("getting posts...")
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
-    query = 'SELECT Id, Text FROM Post WHERE id = 00000000013;'
+    query = 'SELECT Id, Text FROM Post WHERE id > 27982;'
     cursor.execute(query)
 
     ids = []
     texts = []
+    postCleaner = PostCleaner()
 
     row = cursor.fetchone()
     while row is not None:
         ids.append(row['Id'])
         text = row['Text']
-        text = str(text.encode('unicode-escape'))
-        text = text[2:-1]
-        text = text.replace('\\\\u', '\\u')
-        text = text.replace('\\\\U', '\\U')
+        #text = str(text.encode('unicode-escape'))
+        #text = text[2:-1]
+        text = postCleaner.changeEmojisToText(text)
+        text = postCleaner.changeForeignToText(text)
+        #text = text.replace('\\\\u', '\\u')
+        #text = text.replace('\\\\U', '\\U')
+
+        text = ' '.join(nltk.word_tokenize(text))
         texts.append(text)
         row = cursor.fetchone()
 
@@ -47,7 +56,7 @@ def getPostsFromFile(filepath):
     lines = target.readlines()
     posts = []
     for i in range(len(lines)):
-        posts.append(lines[i].rstrip('\n'))
+        posts.append('-'.join(lines[i].rstrip('\n').split()))
     return posts
 
 def updatePosts(ids, posts):
@@ -88,6 +97,7 @@ ids = posts['ids']
 texts = posts['texts']
 
 writePostsToFile(texts, HPOST_IN)
+
 jvmPath = jpype.getDefaultJVMPath()
 jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
 rbpost = JPackage("rbpost").RBPOST

@@ -6,6 +6,8 @@ class PostCleaner:
         try:
             # Wide UCS-4 build
             self.emojiDetector = re.compile(u'['  u'\U0001F300-\U0001F64F'   u'\U0001F680-\U0001F6FF'   u'\u2600-\u26FF\u2700-\u27BF]+',  re.UNICODE)
+            self.foreignDetector = re.compile(r'[^\u0000-\u007F]')
+            self.acronymDetector = re.compile(r'\s([?.!"](?:\s|$))')
         except re.error:
             # Narrow UCS-2 build
             self.emojiDetector = re.compile(u'(' u'\ud83c[\udf00-\udfff]|'  u'\ud83d[\udc00-\ude4f\ude80-\udeff]|'  u'[\u2600-\u26FF\u2700-\u27BF])+',re.UNICODE)
@@ -41,3 +43,11 @@ class PostCleaner:
 
         return self.emojiDetector.sub('', postContent, count=0)
 
+    def changeEmojisToText(self, postContent):
+        return self.emojiDetector.sub('EMOJI ', postContent, count=0)
+
+    def changeForeignToText(self, postContent):
+        return self.foreignDetector.sub('FOREIGN ', postContent,count=0)
+
+    def fixAcronymSpaces(self, postContent):
+        return self.acronymDetector.sub(r'\1', postContent, count=0)

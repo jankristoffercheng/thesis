@@ -5,9 +5,13 @@ import pymysql
 import json
 
 import pytz
+import nltk
+import re
+
 from dateutil.parser import parse
 
 from features.POSFeature import POSFeature
+from utility.PostCleaner import PostCleaner
 
 
 class ConnectionFactory:
@@ -17,6 +21,7 @@ class ConnectionFactory:
 
 
 def addposts():
+    print("adding posts...")
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
@@ -28,7 +33,7 @@ def addposts():
         data = json.load(data_file)
 
     philtz = pytz.timezone("Asia/Manila")
-
+    postCleaner = PostCleaner()
     for i in data:
 
         query = 'Select * from User where Username = %s'
@@ -43,12 +48,17 @@ def addposts():
                 row = cursor.fetchone()
                 id = int(row['Id'])
 
-                posproc = POSFeature(i['text'])
+                tokenizedPost = nltk.word_tokenize(i['text'])
 
+                postContent = ' '.join(tokenizedPost)
+                postContent = postCleaner.fixAcronymSpaces(postContent)
+
+                engPOS = nltk.pos_tag(tokenizedPost)
+                engPOS = '-'.join([posTag[1] for posTag in engPOS])
 
                 try:
-                    cursor.execute('INSERT INTO Post(User, Text, PostTime, POS) VALUES (%s,%s,%s,%s)',
-                                   (id, i['text'], philver.strftime("%H:%M"), posproc.sPOS[1:-1]))
+                    cursor.execute('INSERT INTO Post(User, Text, PostTime, EngPOS) VALUES (%s,%s,%s,%s) ',
+                                   (id, postContent, philver.strftime("%H:%M"), engPOS))
                 except Exception as e:
                     print('fuuu', str(e))
 
@@ -80,6 +90,6 @@ def fixjson():
         for line in file:
             print(line.replace('}{', '},{'), end='')
 
-
-addusers(10)
-addposts()
+#fixjson()
+#addusers(50)
+#addposts()

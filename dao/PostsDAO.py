@@ -3,9 +3,30 @@ import numpy as np
 from connection.Connection import Connection
 from features.POSFeature import POSFeature
 from model.Document import Document
+from model.Post import Post
 
 
 class PostsDAO:
+
+    def getPosts(self, id = None):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'SELECT Id, Text, EngPOS, FilPOS FROM post'
+        if id != None:
+            sql += ' WHERE id >= ' + str(id)
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        posts = []
+        while row is not None:
+            posts.append(Post(row['Id'], row['Text'], row['EngPOS'], row['FilPOS']))
+            row = cursor.fetchone()
+        return posts
+
+    def updateCombinedPOS(self, id, cmbPOS):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        cursor.execute('Update Post SET CmbPOS = %s WHERE id = %s', (cmbPOS, str(id)))
+
     def addPost(self, username, text, hour, min):
         conn = Connection().getConnection()
         cursor = conn.cursor()
