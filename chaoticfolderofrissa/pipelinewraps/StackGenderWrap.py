@@ -7,10 +7,10 @@ class StackGenderWrap(TransformerMixin):
 
     def transform(self, X, **transform_params):
 
-        # gen = X.apply(enrange)
+        gen = X.apply(enrange)
 
         mlb = MultiLabelBinarizer(classes=[0,1])
-        temp = X.apply(lambda x: [x])
+        temp = gen.apply(lambda x: [x])
         data = DataFrame(data=mlb.fit_transform(temp), columns=["Stk." + gender for gender in getClasses()])
 
         return data

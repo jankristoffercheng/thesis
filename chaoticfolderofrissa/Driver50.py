@@ -90,6 +90,41 @@ def dimensionReduction():
     gen_data = feature.getFeatures(selection=SelectKBest(mutual_info_classif, k=1000), mode='Both')
     gen_data.to_csv('data/features_mi_both.csv')
 
+def evaluate(file):
+    age_data = pd.read_csv(file+"Age.csv", index_col=0, encoding='latin1')
+    gen_data = pd.read_csv(file+"Gender.csv", index_col=0, encoding='latin1')
+    both_data = pd.read_csv(file+"Both.csv", index_col=0, encoding='latin1')
+
+    age_model = RootModel(data=age_data, type='Age', modelType=DecisionTreeClassifier)
+    train_results, test_results = age_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
+
+    gen_model = RootModel(data=gen_data, type='Gender', modelType=DecisionTreeClassifier)
+    train_results, test_results = gen_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
+
+    gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=DecisionTreeClassifier)
+    train_results, test_results = gen_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
+
+    age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=DecisionTreeClassifier)
+    train_results, test_results = age_model.evaluateKfold()
+    print(train_results)
+    print(test_results)
+
+    # both_model = RootModel(data=both_data, type='Gender', modelType=DecisionTreeClassifier)
+    # train_results, test_results = both_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
+    #
+    # both_model = RootModel(data=both_data, type='Age', modelType=DecisionTreeClassifier)
+    # train_results, test_results = both_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
+
 #1. Prepare features
 # X, y = DOM().getData()
 # prepareFeatures(X, y)
@@ -98,14 +133,18 @@ def dimensionReduction():
 # dimensionReduction()
 
 #2. kFold for Parallel
+
+evaluate("data/features_chi2_")
+
 # age_data = pd.read_csv("data/features_chi2_age.csv", index_col=0, encoding='latin1')
 # age_model = RootModel(data=age_data, type='Age', modelType=MultinomialNB)
 # train_results, test_results = age_model.evaluateKfold()
 # print(train_results)
 # print(test_results)
+
 #
 # gen_data = pd.read_csv("data/features_mi_Gender.csv", index_col=0, encoding='latin1')
-# gen_model = RootModel(data=gen_data, type='Gender', modelType=Ridge)
+# gen_model = RootModel(data=gen_data, type='Gender', modelType=RidgeClassifier)
 # train_results, test_results = gen_model.evaluateKfold()
 # print(train_results)
 # print(test_results)

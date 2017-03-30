@@ -3,6 +3,7 @@ from collections import Counter
 from sklearn import metrics, svm
 from sklearn.externals import joblib
 from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import GroupKFold
 import pandas as pd
@@ -106,7 +107,7 @@ class StackModel:
                 model = modelType(kernel='linear')
             elif (modelType is MultinomialNB):
                 model = modelType()
-            elif (modelType is Ridge):
+            elif (modelType is RidgeClassifier):
                 model = modelType(alpha=1.0)
             elif (modelType is DecisionTreeClassifier):
                 model = modelType(criterion='entropy', min_samples_split=20, random_state=99)
