@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 
-# from chaoticfolderofrissa.DOM import DOM
-#
-# X, y = DOM().getData()
-# df = X['Text'].to_csv("testing.csv")
-from scipy.sparse import csc_matrix
+from chaoticfolderofrissa.DOM import DOM
+
+X, y = DOM().getData()
+df = X['Text'].to_csv("testing.csv")
+
+# from scipy.sparse import csc_matrix
 
 # DetectorFactory.seed = 0
 #
@@ -15,12 +16,12 @@ from scipy.sparse import csc_matrix
 # import jpype
 # from jpype import *
 
-from sklearn.feature_extraction.text import CountVectorizer
+# from sklearn.feature_extraction.text import CountVectorizer
 
 # from utility.NormalizeFilipino import NormalizeFilipino
 # from utility.PostCleaner import PostCleaner
-from model.Post import Post
-from utility.PostCleaner import PostCleaner
+# from model.Post import Post
+# from utility.PostCleaner import PostCleaner
 
 '''import langid
 
@@ -166,14 +167,14 @@ print(X_train_counts)
 print(count_vect.vocabulary_.get(u'hello'))
 print(count_vect.vocabulary_.get(u'rissa'))
 '''
-import nltk
+# import nltk
 '''from features.POSFeature import POSFeature
 str = 'Dr. Smith is treating Mrs. Chucky'
 posTagger = POSFeature(str)'''
 
 
-from features.POSFeature import POSFeature
-import re
+# from features.POSFeature import POSFeature
+# import re
 # str = 'USERNAME pero yung picture na yun di mo dinelete :^)'
 #email_cleaner = re.compile(r'(\\b([A-Za-z])\\ .)',flags=re.MULTILINE)
 

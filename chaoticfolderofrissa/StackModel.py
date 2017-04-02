@@ -36,7 +36,10 @@ class StackModel:
         i = 1
         while (i < len(X.index)):
             if (user.loc[i] != user.loc[ind] or i == len(X.index) - 1):
-                df = predictions[ind:i - 1]
+                if (i == len(X.index) - 1):
+                    df = predictions[ind:i]
+                else:
+                    df = predictions[ind:i - 1]
                 counter = Counter(df)
                 useres.append(counter.most_common(1)[0][0])
                 trueres.append(y.loc[ind])

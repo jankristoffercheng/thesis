@@ -28,14 +28,12 @@ from chaoticfolderofrissa.pipelinewraps.TFIDFWrap import TFIDFWrap
 
 
 def prepareFeatures(X , y):
-    # posSeqPipeline = Pipeline([
-    #                         ('get_top', POSSeqWrap())
-    #                   ])
-    #
-    # posSeqFeatures = posSeqPipeline.fit_transform(X)
-    # posSeqFeatures.to_csv('data/posSequence_features.csv')
-    y['Gender'] = GenderWrap().fit_transform(y['Gender'])
-    y['Age'] = AgeRangeWrap().fit_transform(y['Age'])
+    posSeqPipeline = Pipeline([
+                            ('get_top', POSSeqWrap())
+                      ])
+
+    posSeqFeatures = posSeqPipeline.fit_transform(X)
+    posSeqFeatures.to_csv('data/posSequence_features.csv')
 
     frequencyPipeline = Pipeline([
                             ('extract', ItemSelector('Text')),
@@ -63,7 +61,7 @@ def dimensionReduction():
     gen_data = feature.getFeatures(selection=SelectKBest(chi2, k=1000), mode='Both')
     gen_data.to_csv('data/features_chi2_both.csv')
 
-    gen_data = feature.getFeatures(selection=PCA(n_components=1000), mode='Gender')
+    gen_data = feature.getFeatures(selection=SVD(n_components=1000), mode='Gender')
     gen_data.to_csv('data/features_pca_gender.csv')
     gen_data = feature.getFeatures(selection=PCA(n_components=1000), mode='Age')
     gen_data.to_csv('data/features_pca_age.csv')
@@ -82,7 +80,15 @@ X, y = DOM().getData()
 prepareFeatures(X, y)
 
 #2. Dimension Reduction
-# dimensionReduction()
+# feature=Feature()
+# gen_data = feature.getFeatures(selection=SelectKBest(chi2, k=1000), mode='Gender')
+# gen_data.to_csv('data/features_chi2_gender.csv')
+# age_data = feature.getFeatures(selection=PCA(n_components=1000), mode='Age')
+# age_data.to_csv('data/features_pca_age.csv')
+# both_data = feature.getFeatures(selection=SelectKBest(mutual_info_classif, k=1000), mode='Both')
+# both_data.to_csv('data/features_mi_both.csv')
+
+dimensionReduction()
 
 #2. kFold for Parallel
 # age_data = pd.read_csv("data/features_chi2_age.csv", index_col=0, encoding='latin1')

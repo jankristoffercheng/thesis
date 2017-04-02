@@ -35,7 +35,11 @@ class RootModel:
         i = 1
         while (i < len(X.index)):
             if (user.loc[i] != user.loc[ind] or i == len(X.index) - 1):
-                df = predictions[ind:i - 1]
+                if(i==len(X.index) -1):
+                    df = predictions[ind:i]
+                else:
+                    df = predictions[ind:i - 1]
+
                 counter = Counter(df)
                 useres.append(counter.most_common(1)[0][0])
                 trueres.append(y.loc[ind])
@@ -53,6 +57,7 @@ class RootModel:
         test_results = {'Post':[],'User':[]}
 
         for ind, train_index, test_index in zip(range(len(self.train_index)), self.train_index, self.test_index):
+            # print("evaluate")
             trainUser = self.user.iloc[train_index].reset_index(drop=True)
             trainX = self.X.iloc[train_index].reset_index(drop=True)
             trainY = self.y.iloc[train_index].reset_index(drop=True)
@@ -90,11 +95,12 @@ class RootModel:
     def __kFold(self, modelType):
         self.models = []
         for train_index, test_index in zip(self.train_index, self.test_index):
+            # print("train")
             if(modelType is svm.SVC):
                 model = modelType(kernel='linear')
             elif(modelType is MultinomialNB):
                 model = modelType()
-            elif(modelType is Ridge):
+            elif(modelType is RidgeClassifier):
                 model = modelType(alpha=1.0)
             elif(modelType is DecisionTreeClassifier):
                 model = modelType(criterion='entropy',min_samples_split=20, random_state=99)
