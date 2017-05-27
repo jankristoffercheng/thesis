@@ -104,35 +104,35 @@ def getSpecificFeatures(data, features):
     return data[filter_col]
 
 def evaluate(file):
-    age_data = pd.read_csv(file+"Age.csv", index_col=0, encoding='latin1')
-    gen_data = pd.read_csv(file+"Gender.csv", index_col=0, encoding='latin1')
+    # age_data = pd.read_csv(file+"Age.csv", index_col=0, encoding='latin1')
+    # gen_data = pd.read_csv(file+"Gender.csv", index_col=0, encoding='latin1')
     both_data = pd.read_csv(file+"Both.csv", index_col=0, encoding='latin1')
 
 
-    age_model = RootModel(data=age_data, type='Age', modelType=svm.SVC)
-    train_results, test_results = age_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    # age_model = RootModel(data=age_data, type='Age', modelType=svm.SVC)
+    # train_results, test_results = age_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
+    #
+    # gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=svm.SVC)
+    # train_results, test_results = gen_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
+    #
+    # gen_model = RootModel(data=gen_data, type='Gender', modelType=svm.SVC)
+    # train_results, test_results = gen_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
+    #
+    # age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=svm.SVC)
+    # train_results, test_results = age_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
 
-    gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=svm.SVC)
-    train_results, test_results = gen_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
-
-    gen_model = RootModel(data=gen_data, type='Gender', modelType=svm.SVC)
-    train_results, test_results = gen_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
-
-    age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=svm.SVC)
-    train_results, test_results = age_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
-
-    both_model = RootModel(data=both_data, type='Gender', modelType=svm.SVC)
-    train_results, test_results = both_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    # both_model = RootModel(data=both_data, type='Gender', modelType=svm.SVC)
+    # train_results, test_results = both_model.evaluateKfold()
+    # print(train_results)
+    # print(test_results)
 
     both_model = RootModel(data=both_data, type='Age', modelType=svm.SVC)
     train_results, test_results = both_model.evaluateKfold()

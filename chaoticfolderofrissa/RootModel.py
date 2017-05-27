@@ -71,6 +71,8 @@ class RootModel:
             testY = self.y.iloc[test_index].reset_index(drop=True)
 
             useres, trueres = self.__evaluateUserFold(test_predictions[ind], testUser, testX, testY)
+            print(test_predictions[ind])
+            print(useres)
             test_results['Post'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[ind])))
             test_results['User'].append(metrics.accuracy_score(trueres, useres))
 
@@ -95,7 +97,7 @@ class RootModel:
     def __kFold(self, modelType):
         self.models = []
         for train_index, test_index in zip(self.train_index, self.test_index):
-            # print("train")
+            print("train")
             if(modelType is svm.SVC):
                 model = modelType(kernel='linear')
             elif(modelType is MultinomialNB):
