@@ -27,12 +27,11 @@ class PostsDAO:
         cursor = conn.cursor()
         cursor.execute('Update Post SET CmbPOS = %s WHERE id = %s', (cmbPOS, str(id)))
 
-    def addPost(self, username, text, hour, min):
+    def addPost(self, user_id, text, hour, min):
         conn = Connection().getConnection()
         cursor = conn.cursor()
         #get the user id from username
-        user_id = '1'
-        sql = 'INSERT INTO posts(user_id, text, time) VALUES (' + \
+        sql = 'INSERT INTO post(user_id, text, time) VALUES (' + \
             '\'' + user_id + '\', ' + \
             '\'' + text + '\', ' + \
             '\'' + hour + ':' + min + '\')'

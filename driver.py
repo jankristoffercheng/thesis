@@ -1,10 +1,4 @@
-import nltk
-import pymysql
-from connection.Connection import Connection
 from controller.Controller import Controller
-from dao.PostsDAO import PostsDAO
-from features.POSFeature import POSFeature
-from sklearn.externals import joblib
 
 print("hello world")
 

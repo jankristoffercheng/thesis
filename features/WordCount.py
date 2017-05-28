@@ -34,7 +34,7 @@ class WordCount:
         for word in words:
             if word[0].isalnum():
                 aveLength += len(word)
-                nWords += 1
+                nWords  += 1
         return aveLength/nWords
 
     def getNWordsWithRepLetters(self, text):
