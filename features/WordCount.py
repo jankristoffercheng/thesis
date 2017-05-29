@@ -1,4 +1,5 @@
 import nltk
+import math
 import re
 from collections import Counter
 
@@ -101,11 +102,10 @@ class WordCount:
                 nWords += 1
                 legitWords.append(word)
         counted = dict(Counter(legitWords))
-        print(counted)
         for key in counted:
             if counted[key] == 1:
                 onceWords.append(key)
-        return len(onceWords)/nWords
+        return len(onceWords)
 
     def getHapaxDislegomena(self, text):
         twiceWords = []
@@ -118,11 +118,16 @@ class WordCount:
                 nWords += 1
                 legitWords.append(word)
         counted = dict(Counter(legitWords))
-        print(counted)
         for key in counted:
             if counted[key] == 2:
                 twiceWords.append(key)
-        return len(twiceWords) / nWords
+        return len(twiceWords)
+
+    def getRatioOfHapaxLegomena(self, text):
+        return self.getHapaxLegomena(text)/self.getTotalNumberOfWords(text)
+
+    def getRatioOfHapaxDislegomena(self, text):
+        return self.getHapaxDislegomena(text)/self.getTotalNumberOfWords(text)
 
     def getWordLengthFreqDist(self, text):
         nWords = 0
@@ -138,13 +143,71 @@ class WordCount:
         return freqDist
 
     def getRatioOfNetAbbrev(self, text):
-        nWords = 0
-        nAbbrevs = 0
         words = nltk.word_tokenize(text)
+        legitWords = []
         for word in words:
-            word = word.lower()
             if word[0].isalnum():
-                nWords += 1
-                if word in self.ABBREVIATIONS:
-                    nAbbrevs += 1
-        return nAbbrevs/nWords
+                legitWords.append(word)
+        text = ' '.join(legitWords)
+        regexes = ['(' + '+'.join(abbrev) + '+)' for abbrev in self.ABBREVIATIONS]
+        abbrevs = re.findall('\\b(' + '|'.join(regexes) + ')\\b', text)
+        return len(abbrevs)/self.getTotalNumberOfWords(text)
+
+    def getDictOfWordsMappedToOccurrence(self, text):
+        words = nltk.word_tokenize(text)
+        legitWords = []
+        for word in words:
+            if word[0].isalnum():
+                legitWords.append(word)
+        wordDict = dict(Counter(legitWords))
+        return wordDict
+
+    def getOccurrenceArray(self, text):
+        wordDict = self.getDictOfWordsMappedToOccurrence(text)
+        maxKey = max(wordDict, key=wordDict.get)
+        maxVal = wordDict[maxKey]
+        occurrenceA = [0 for i in range(maxVal)]
+        for key, val in wordDict.items():
+            occurrenceA[val - 1] += 1
+        return occurrenceA
+
+    def getYulesK(self, text):
+        summation = 0
+        occurrenceA = self.getOccurrenceArray(text)
+        N = self.getTotalNumberOfWords(text)
+        for i in range(len(occurrenceA)):
+            summation += occurrenceA[i] * ((i+1)/N) * ((i+1)/N)
+        return 10000 * ((-1/N) + summation)
+
+    def getSimpsonsD(self, text):
+        summation = 0
+        occurrenceA = self.getOccurrenceArray(text)
+        N = self.getTotalNumberOfWords(text)
+        for i in range(len(occurrenceA)):
+            summation += occurrenceA[i] * ((i + 1) / N) * (i/N-1)
+        return summation
+
+    def getNDifferentWords(self, text):
+        words = nltk.word_tokenize(text)
+        legitWords = []
+        for word in words:
+            if word[0].isalnum():
+                legitWords.append(word)
+        return len(set(legitWords))
+
+    def getSichelsS(self, text):
+        return self.getHapaxDislegomena(text)/self.getNDifferentWords(text)
+
+    def getHonoresR(self, text):
+        N = self.getTotalNumberOfWords(text)
+        V = self.getNDifferentWords(text)
+        hapaxLegomena = self.getHapaxLegomena(text)
+        return 100 * math.log10(N) / (1 - (hapaxLegomena/V))
+
+    def getEntropy(self, text):
+        summation = 0
+        occurrenceA = self.getOccurrenceArray(text)
+        N = self.getTotalNumberOfWords(text)
+        for i in range(len(occurrenceA)):
+            summation += occurrenceA[i] * (-math.log10((i+1)/N)) * ((i+1)/N)
+        return summation
