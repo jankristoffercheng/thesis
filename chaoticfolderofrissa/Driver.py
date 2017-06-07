@@ -1,4 +1,6 @@
 from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_selection import SelectFpr
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.feature_selection import mutual_info_classif
@@ -54,25 +56,25 @@ def prepareFeatures(X , y):
 
 def dimensionReduction():
     feature=Feature()
-    gen_data = feature.getFeatures(selection=SelectKBest(chi2, k=1000), mode='Gender')
+    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Gender')
     gen_data.to_csv('data/features_chi2_gender.csv')
-    gen_data = feature.getFeatures(selection=SelectKBest(chi2, k=1000), mode='Age')
+    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Age')
     gen_data.to_csv('data/features_chi2_age.csv')
-    gen_data = feature.getFeatures(selection=SelectKBest(chi2, k=1000), mode='Both')
+    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Both')
     gen_data.to_csv('data/features_chi2_both.csv')
 
-    gen_data = feature.getFeatures(selection=SVD(n_components=1000), mode='Gender')
-    gen_data.to_csv('data/features_pca_gender.csv')
-    gen_data = feature.getFeatures(selection=PCA(n_components=1000), mode='Age')
-    gen_data.to_csv('data/features_pca_age.csv')
-    gen_data = feature.getFeatures(selection=PCA(n_components=1000), mode='Both')
-    gen_data.to_csv('data/features_pca_both.csv')
+    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=1000), mode='Gender')
+    gen_data.to_csv('data/features_svd_gender.csv')
+    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=1000), mode='Age')
+    gen_data.to_csv('data/features_svd_age.csv')
+    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=1000), mode='Both')
+    gen_data.to_csv('data/features_svd_both.csv')
 
-    gen_data = feature.getFeatures(selection=SelectKBest(mutual_info_classif, k=1000), mode='Gender')
+    gen_data = feature.getFeatures(selection=SelectFpr(mutual_info_classif), mode='Gender')
     gen_data.to_csv('data/features_mi_gender.csv')
-    gen_data = feature.getFeatures(selection=SelectKBest(mutual_info_classif, k=1000), mode='Age')
+    gen_data = feature.getFeatures(selection=SelectFpr(mutual_info_classif), mode='Age')
     gen_data.to_csv('data/features_mi_age.csv')
-    gen_data = feature.getFeatures(selection=SelectKBest(mutual_info_classif, k=1000), mode='Both')
+    gen_data = feature.getFeatures(selection=SelectFpr(mutual_info_classif), mode='Both')
     gen_data.to_csv('data/features_mi_both.csv')
 
 #1. Prepare features
