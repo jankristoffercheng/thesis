@@ -13,14 +13,14 @@ class PostCleaner:
             self.emojiDetector = re.compile(u'(' u'\ud83c[\udf00-\udfff]|'  u'\ud83d[\udc00-\ude4f\ude80-\udeff]|'  u'[\u2600-\u26FF\u2700-\u27BF])+',re.UNICODE)
 
     def getEmojis(self, postContent):
-        print("get emoji:",postContent)
+        #print("get emoji:",postContent)
         postContent = postContent.encode('unicode_escape')
         postContent = str(postContent, 'unicode_escape')
 
         for i in range(0, len(postContent)-1):
             if(self.emojiDetector.match(postContent[i]) != None and postContent[i+1] != ' '):
                 postContent = postContent[:i]+self.insertSpace(postContent[i:])
-        print("result:",postContent)
+        #print("result:",postContent)
         return self.emojiDetector.findall(postContent)
 
     def insertSpace(self,postContent):

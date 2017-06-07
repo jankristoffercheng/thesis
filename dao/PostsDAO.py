@@ -8,6 +8,18 @@ from model.Post import Post
 
 class PostsDAO:
 
+    def getAllPost(self):
+        conn = Connection().getConnection()
+        cursor = conn.cursor()
+        sql = 'SELECT text FROM post'
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        posts = []
+        while row is not None:
+            posts.append(row['text'])
+            row = cursor.fetchone()
+        return posts
+
     def getPosts(self, id = None):
         conn = Connection().getConnection()
         cursor = conn.cursor()
