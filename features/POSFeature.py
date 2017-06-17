@@ -40,7 +40,6 @@ class POSFeature:
 
 
         tokenizedText = nltk.word_tokenize(text)
-        print('tokenized:', tokenizedText)
         pos = nltk.pos_tag(tokenizedText)
         pos = '-'.join([posTag[1] for posTag in pos])
         return pos

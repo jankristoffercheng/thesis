@@ -4,6 +4,7 @@ import jpype
 from jpype import *
 import shutil
 
+from features.POSFeature import POSFeature
 from prepareedsthesis import ConnectionFactory
 from utility.PostCleaner import PostCleaner
 
@@ -20,7 +21,7 @@ def getPosts():
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
-    query = 'SELECT Id, Text FROM Post WHERE id > 27982;'
+    query = 'SELECT Id, Text FROM Post WHERE Id IS NULL;'
     cursor.execute(query)
 
     ids = []
@@ -34,15 +35,26 @@ def getPosts():
         #text = str(text.encode('unicode-escape'))
         #text = text[2:-1]
         text = postCleaner.changeEmojisToText(text)
+        text = postCleaner.normalizeUnicode(text)
         text = postCleaner.changeForeignToText(text)
+        text = postCleaner.changeLinkToText(text)
         #text = text.replace('\\\\u', '\\u')
         #text = text.replace('\\\\U', '\\U')
-
         text = ' '.join(nltk.word_tokenize(text))
         texts.append(text)
         row = cursor.fetchone()
 
     return {'ids': ids, 'texts': texts}
+
+def updateEngPOS(ids, texts):
+    posFeature = POSFeature()
+    conn = ConnectionFactory().getConnectionThesis()
+    cursor = conn.cursor()
+    for i in range(len(ids)):
+        text = texts[i]
+        engPOS = posFeature.getEnglishPOS(text)
+        cursor.execute('UPDATE post SET EngPOS = %s WHERE id = %s', (engPOS, str(ids[i])))
+        print(ids[i])
 
 def writePostsToFile(posts, filepath):
     target = open(filepath, 'w')
@@ -95,7 +107,9 @@ shutil.copy2(NORMALIZE_OUT, HPOST_IN)
 posts = getPosts()
 ids = posts['ids']
 texts = posts['texts']
+updateEngPOS(ids, texts)
 
+'''
 writePostsToFile(texts, HPOST_IN)
 
 jvmPath = jpype.getDefaultJVMPath()
@@ -106,4 +120,4 @@ rbpost.hPOST_File(HPOST_IN, '', '')
 posts = getPostsFromFile(HPOST_OUT)
 
 jpype.shutdownJVM()
-updatePosts(ids, posts)
+updatePosts(ids, posts)'''

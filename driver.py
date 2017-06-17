@@ -1,6 +1,17 @@
 from controller.Controller import Controller
 
-print("hello world")
+import unicodedata
+
+from utility.PostCleaner import PostCleaner
+
+postCleaner= PostCleaner()
+
+sample = "ＰＡＩＮ　ＩＳ　⛪https://t.co/7tI7SJigKe e 4/26 夕方 thank you!! (*´˘`*)♡ "
+sample = postCleaner.changeEmojisToText(sample)
+sample = postCleaner.normalizeUnicode(sample)
+sample = postCleaner.changeForeignToText(sample)
+sample = postCleaner.changeLinkToText(sample)
+print(sample)
 
 # conn = Connection().getConnection()
 
@@ -21,7 +32,7 @@ controller.addUser('conan', 'F', '2000', '01', '01', 'Twitter')
 
 # joblib.dump(clf, 'prototype.pkl')
 #clf = Controller().trainGenderPreferential()
-clf = Controller().trainPOSSequencePatternWithTree()
+#clf = Controller().trainPOSSequencePatternWithTree()
 #clf = joblib.load('prototype.pkl')
 #print(Controller().classifyGenderUsingSVMwithPersist(clf, '@anierlebasi that is what you are... Honey you\'re my golden star.... I know you could make my wish come true. (Napakanta ako)'))
 #print(Controller().classifyGenderUsingSVM("@Aryellitaaa Hahaha. Walaaaa! Sige."))
