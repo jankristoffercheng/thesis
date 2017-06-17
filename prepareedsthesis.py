@@ -29,7 +29,7 @@ def addposts():
     cursor.execute('SET CHARACTER SET utf8mb4;')
     cursor.execute('SET character_set_connection=utf8mb4;')
 
-    with open('edsthesis_data.json') as data_file:
+    with open('results.json') as data_file:
         data = json.load(data_file)
 
     philtz = pytz.timezone("Asia/Manila")
@@ -58,7 +58,7 @@ def addposts():
 
                 try:
                     cursor.execute('INSERT INTO Post(User, Text, PostTime, EngPOS) VALUES (%s,%s,%s,%s) ',
-                                   (id, postContent, philver.strftime("%H:%M"), engPOS))
+                                   (id, postContent, philver.strftime('%Y-%m-%d %H:%M:%S'), engPOS))
                 except Exception as e:
                     print('fuuu', str(e))
 
@@ -69,18 +69,20 @@ def addusers(limit=None):
     cursor.execute('SET NAMES utf8mb4;')
     cursor.execute('SET CHARACTER SET utf8mb4;')
     cursor.execute('SET character_set_connection=utf8mb4;')
-
-    with open('PersonalInfo_filtered.csv') as csvfile:
+    print("a")
+    with open('Compiled_List_Of_Users.csv') as csvfile:
+        print("b")
         readCSV = csv.reader(csvfile, delimiter=';')
 
         ind = 0
         for row in readCSV:
-            if ((limit == None or ind < limit) and (row[11] == "PH" and int(row[12].split()[0]) >= 8)):
+            if ((limit == None or ind < limit) and (row[8] == "PH" and int(row[9].split()[0]) >= 8)):
+                print("d")
                 sex = 'F'
-                if (row[4] == 'male'):
+                if (row[1] == 'male'):
                     sex = 'M'
-                cursor.execute('INSERT INTO User(Username, Gender, Birthdate, Source) VALUES (%s,%s,%s,%s)',
-                               (row[0], sex, row[3] + "-" + str(row[1]).zfill(2) + "-" + row[2], 'Twitter'))
+                cursor.execute('INSERT INTO User(Username, Gender, Age, Source) VALUES (%s,%s,%s,%s)',
+                               (row[0], sex, row[11], 'Twitter'))
                 ind+=1
 
 def fixjson():
@@ -91,5 +93,5 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 #fixjson()
-#addusers(50)
-#addposts()
+addusers()
+# addposts()
