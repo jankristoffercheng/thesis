@@ -21,7 +21,7 @@ def getPosts():
     conn = ConnectionFactory().getConnectionThesis()
     conn.set_charset('utf8mb4')
     cursor = conn.cursor()
-    query = 'SELECT Id, Text FROM Post WHERE Id IS NULL;'
+    query = 'SELECT Id, Text FROM Post;'
     cursor.execute(query)
 
     ids = []

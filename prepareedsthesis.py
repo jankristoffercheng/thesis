@@ -16,7 +16,7 @@ from utility.PostCleaner import PostCleaner
 
 class ConnectionFactory:
     def getConnectionThesis(self):
-        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterdbmerged', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='root', db='twitterdbmerged', charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
 
@@ -93,5 +93,4 @@ def fixjson():
             print(line.replace('}{', '},{'), end='')
 
 #fixjson()
-addusers()
 # addposts()

@@ -5,6 +5,8 @@ from jpype import *
 import nltk
 from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 from utility.LanguageDetector import LanguageDetector, Language
+from utility.PostCleaner import PostCleaner
+import time
 
 class POSFeature:
     VERB = 'VB'
@@ -16,11 +18,7 @@ class POSFeature:
         self.nAdjectives = 0
         self.sPOS = ''
         self.mapping = {}
-        #self.populateMappingDictionary()
-        #self.populateMappingDictionary()
-
-        #self.getPOSCount(text)
-        #self.getPOSTag(text)
+        self.postCleaner = PostCleaner()
 
     def populateMappingDictionary(self):
         print("populating map dictionary...")
@@ -57,18 +55,29 @@ class POSFeature:
 
     def getCombinedPOSTag(self, post):
 
-        #print("combining pos...[",post.id,"]")
-        #assumptions: engPOS and filPOS are strings that contains POS tags sperated by -
-        tokenizedText = nltk.word_tokenize(post.content)
+        print("combining pos...[",post.id,"]")
+        #assumptions: engPOS and filPOS are strings that contains POS tags separated by -
+        #step 1: split tweets/posts into sentences and mapped fpos to epos
 
-        #step 1: split tweets/posts into sentences
-        text = ' '.join(tokenizedText)
+        text = post.content
+        text = self.postCleaner.changeEmojisToText(text)
+        text = self.postCleaner.normalizeUnicode(text)
+        text = self.postCleaner.changeForeignToText(text)
+        text = self.postCleaner.changeLinkToText(text)
+        text = ' '.join(nltk.word_tokenize(text))
+
         finalPOSTags = []
         filTags =[]
 
+        #step 1.1: get the resulting epos tag
         engTags = [tag for tag in post.epos.split("-")]
 
+        #step 1.2: get the resulting fpos tag
         splitFPOS = post.fpos.split("-")
+
+        #print("raw eng tags:", engTags)
+
+        #step 1.3: mapped the fpos to its corresponding epos
         for i in range(len(splitFPOS)):
             if(i != len(splitFPOS)-1):
 
@@ -83,58 +92,52 @@ class POSFeature:
 
         startIndex = 0
 
-        # print("resulting mapped fil tags:", filTags)
+        #print("map fil tags:", filTags)
+
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
 
-        ''' sentences = []
-        punctuations = ['.', '?', '!']
-        prevIndex = 0
-        i = 0
-        while i < len(post.content):
-            while post.content[i] not in punctuations:
-                sentence = sentences[prevIndex:i]
-                i += 1
-            print("sentence:",sentence)'''
-
-        for sentence in nltk.sent_tokenize(post.content):
+        #print("sentence list:", nltk.sent_tokenize(text))
+        for sentence in nltk.sent_tokenize(text):
             language = langDetector.getLanguage(sentence)
             wordCount = len(sentence.split())
-
-            #print("language:", language , " sentence: ", sentence)
-            #print("startIndex:", startIndex, " wordCount:", wordCount , " sentence:", sentence)
+            #print("word count:", wordCount , " sentence:", sentence, " language:", language)
             if(language == Language.FILIPINO):
                 for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(filTags[i])
-
             elif(language == Language.ENGLISH):
                 for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(engTags[i])
-
             else:
-                for i in range(startIndex, wordCount + startIndex):
-                  #  print("[",i,"] range:", wordCount +startIndex)
-
-                    if (engTags[i] == filTags[i]):
+                if(len(engTags) != len(filTags)):
+                    for i in range(startIndex, wordCount + startIndex):
                         finalPOSTags.append(engTags[i])
+                    print("not same length...............................", sentence)
+                    #time.sleep(5.5)
+                else:
+                    for i in range(startIndex, wordCount + startIndex):
+                       # print("index[",i,"] range:", wordCount +startIndex)
 
-                    elif (filTags[i] == 'UNK'):
-                        finalPOSTags.append(engTags[i])
+                        if (engTags[i] == filTags[i]):
+                            finalPOSTags.append(engTags[i])
 
-                    elif (filTags[i] == 'FW' and engTags[i] != 'FW'):
-                        finalPOSTags.append(engTags[i])
+                        elif (filTags[i] == 'UNK'):
+                            finalPOSTags.append(engTags[i])
 
-                    elif (engTags[i] == 'FW' and filTags[i] != 'FW'):
-                        finalPOSTags.append(filTags[i])
+                        elif (filTags[i] == 'FW' and engTags[i] != 'FW'):
+                            finalPOSTags.append(engTags[i])
 
-                    elif (filTags[i][:2] == engTags[i][:2]):
-                        finalPOSTags.append(filTags[i][:2])
+                        elif (engTags[i] == 'FW' and filTags[i] != 'FW'):
+                            finalPOSTags.append(filTags[i])
 
-                    else:
-                        finalPOSTags.append(filTags[i])
+                        elif (filTags[i][:2] == engTags[i][:2]):
+                            finalPOSTags.append(filTags[i][:2])
+
+                        else:
+                            finalPOSTags.append(filTags[i])
 
             startIndex = startIndex + wordCount
-
+        #print("final result:",finalPOSTags)
         return '-'.join(finalPOSTags)
 
 
