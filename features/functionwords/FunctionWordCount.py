@@ -3,7 +3,7 @@ import re
 
 class FunctionWordCount:
 
-    FUNCTIONWORDS_FILENAME = 'functionwords.txt'
+    FUNCTIONWORDS_FILENAME = '../features/functionwords/functionwords.txt'
 
     def __init__(self):
         with open(self.FUNCTIONWORDS_FILENAME) as f:

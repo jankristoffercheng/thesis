@@ -1,10 +1,9 @@
 from nltk.tokenize.punkt import PunktSentenceTokenizer, PunktParameters
 from features.WordCount import WordCount
 import nltk
-from dao.PostsDAO import PostsDAO
 class Structure:
 
-    ABBREVIATIONS_FILENAME = 'abbreviations.txt'
+    ABBREVIATIONS_FILENAME = '../features/abbreviations.txt'
     def __init__(self):
         with open(self.ABBREVIATIONS_FILENAME) as f:
             ABBREVIATIONS = f.read().splitlines()
@@ -65,8 +64,8 @@ class Structure:
 
         return nChar//nParagraphs
 
-structure = Structure()
-print(structure.getNSentenceBegUpper("Nag-aral nang masaya ang mga mag-aaral. pupunta sa paaralan ang mga mag-aaral...dito na ba ?"))
+# structure = Structure()
+# print(structure.getNSentenceBegUpper("Nag-aral nang masaya ang mga mag-aaral. pupunta sa paaralan ang mga mag-aaral...dito na ba ?"))
 '''
 text = "Hi my name is shayane! \n do you kniw me?"
 print(text)

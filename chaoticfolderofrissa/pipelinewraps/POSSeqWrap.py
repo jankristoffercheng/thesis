@@ -4,6 +4,7 @@ from sklearn.base import TransformerMixin
 import pandas as pd
 from features.POSSequencePattern import POSSequencePattern
 from model.Document import Document
+from utility.DataCleaner import DataCleaner
 
 
 class POSSeqWrap(TransformerMixin):
@@ -33,5 +34,6 @@ class POSSeqWrap(TransformerMixin):
 def dfToDocument(df):
     list = []
     for index, row in df.iterrows():
-        list.append(Document(row['Text'], row['POS']))
+        list.append(Document(
+            DataCleaner().clean_data(row['Text']), row['POS']))
     return list

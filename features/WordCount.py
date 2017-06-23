@@ -5,7 +5,7 @@ from collections import Counter
 
 class WordCount:
 
-    ABBREVIATIONS_FILENAME = 'abbreviations.txt'
+    ABBREVIATIONS_FILENAME = '../features/abbreviations.txt'
 
     def __init__(self):
         with open(self.ABBREVIATIONS_FILENAME) as f:
@@ -36,7 +36,8 @@ class WordCount:
             if word[0].isalnum():
                 aveLength += len(word)
                 nWords  += 1
-        return aveLength/nWords
+        if(nWords==0): return  0
+        else: return aveLength/nWords
 
     def getNWordsWithRepLetters(self, text):
         nWords = 0
@@ -67,7 +68,8 @@ class WordCount:
             word = word.lower()
             if word[0].isalnum():
                 legitWords.append(word)
-        return len(set(legitWords))/len(legitWords)
+        if(len(legitWords)==0): return 0
+        else: return len(set(legitWords))/len(legitWords)
 
     def getRatioOfShortWords(self, text):
         words = nltk.word_tokenize(text)
@@ -78,7 +80,8 @@ class WordCount:
                 nWords += 1
                 if len(word) <= 3:
                     nShortWords += 1
-        return nShortWords/nWords
+        if(nWords==0): return 0
+        else: return nShortWords/nWords
 
     def getLolHmmCount(self, text):
         count = 0
@@ -124,10 +127,16 @@ class WordCount:
         return len(twiceWords)
 
     def getRatioOfHapaxLegomena(self, text):
-        return self.getHapaxLegomena(text)/self.getTotalNumberOfWords(text)
+        if (self.getTotalNumberOfWords(text) == 0):
+            return 0
+        else:
+            return self.getHapaxLegomena(text)/self.getTotalNumberOfWords(text)
 
     def getRatioOfHapaxDislegomena(self, text):
-        return self.getHapaxDislegomena(text)/self.getTotalNumberOfWords(text)
+        if (self.getTotalNumberOfWords(text) == 0):
+            return 0
+        else:
+            return self.getHapaxDislegomena(text)/self.getTotalNumberOfWords(text)
 
     def getWordLengthFreqDist(self, text):
         nWords = 0
@@ -151,7 +160,10 @@ class WordCount:
         text = ' '.join(legitWords)
         regexes = ['(' + '+'.join(abbrev) + '+)' for abbrev in self.ABBREVIATIONS]
         abbrevs = re.findall('\\b(' + '|'.join(regexes) + ')\\b', text)
-        return len(abbrevs)/self.getTotalNumberOfWords(text)
+        if (self.getTotalNumberOfWords(text) == 0):
+            return 0
+        else:
+            return len(abbrevs)/self.getTotalNumberOfWords(text)
 
     def getDictOfWordsMappedToOccurrence(self, text):
         words = nltk.word_tokenize(text)
@@ -164,12 +176,14 @@ class WordCount:
 
     def getOccurrenceArray(self, text):
         wordDict = self.getDictOfWordsMappedToOccurrence(text)
-        maxKey = max(wordDict, key=wordDict.get)
-        maxVal = wordDict[maxKey]
-        occurrenceA = [0 for i in range(maxVal)]
-        for key, val in wordDict.items():
-            occurrenceA[val - 1] += 1
-        return occurrenceA
+        if(len(wordDict)>0):
+            maxKey = max(wordDict, key=wordDict.get)
+            maxVal = wordDict[maxKey]
+            occurrenceA = [0 for i in range(maxVal)]
+            for key, val in wordDict.items():
+                occurrenceA[val - 1] += 1
+            return occurrenceA
+        else: return []
 
     def getYulesK(self, text):
         summation = 0
@@ -177,7 +191,10 @@ class WordCount:
         N = self.getTotalNumberOfWords(text)
         for i in range(len(occurrenceA)):
             summation += occurrenceA[i] * ((i+1)/N) * ((i+1)/N)
-        return 10000 * ((-1/N) + summation)
+        if (N == 0):
+            return 0
+        else:
+            return 10000 * ((-1/N) + summation)
 
     def getSimpsonsD(self, text):
         summation = 0
@@ -196,13 +213,15 @@ class WordCount:
         return len(set(legitWords))
 
     def getSichelsS(self, text):
-        return self.getHapaxDislegomena(text)/self.getNDifferentWords(text)
+        if(self.getNDifferentWords(text)>0): return self.getHapaxDislegomena(text)/self.getNDifferentWords(text)
+        else: return 0
 
     def getHonoresR(self, text):
         N = self.getTotalNumberOfWords(text)
         V = self.getNDifferentWords(text)
         hapaxLegomena = self.getHapaxLegomena(text)
-        return 100 * math.log10(N) / (1 - (hapaxLegomena/V))
+        if(V!=0 and (1 - (hapaxLegomena/V))!=0): return 100 * math.log10(N) / (1 - (hapaxLegomena/V))
+        else: return 0
 
     def getEntropy(self, text):
         summation = 0
