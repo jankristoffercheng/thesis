@@ -11,8 +11,8 @@ def v(verbose, text):
 
 
 server = "https://app.receptiviti.com"
-api_key = "58aef3b284e37505c2bc912d"
-api_secret = "MxHkthlTnVCT8etCHBf9p8mB9vMM9FMjjdA0PJM9EGk"
+api_key = "5941ee1394460405d5c8fd36"
+api_secret = "k7hNczqAAB7cihhXpxqewFbw2N4NJjJ96nsfCvWPtcI"
 
 class Receptiviti():
     def __init__(self,verbose=False):

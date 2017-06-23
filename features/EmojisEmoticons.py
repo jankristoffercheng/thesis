@@ -1,15 +1,17 @@
-from dao.PostsDAO import PostsDAO
 from features.TFIDF import TFIDF
 from utility.PostCleaner import PostCleaner
 
 
 class EmojisEmoticons:
 
-    def getEmojiTFIDF(self):
-        postDAO = PostsDAO()
+    def __init__(self):
+        self.tfidf = TFIDF()
+
+    def getEmojiTFIDF(self, data):
+        # postDAO = PostsDAO()
         postCleaner = PostCleaner()
         emojiList = []
-        for post in postDAO.getAllPost():
+        for index, post in data.iteritems():
             result = ' '.join(postCleaner.getEmojis(post))
 
             if result != '':
@@ -17,9 +19,10 @@ class EmojisEmoticons:
                 emojiList.append(result.encode('unicode_escape'))
 
         print("emoji post:",emojiList)
-        tfidf = TFIDF()
-        return tfidf.get_training_TFIDF(emojiList)
+        return self.tfidf.get_training_TFIDF(emojiList)
 
+    def getLabels(self):
+        return self.tfidf.getFeatureNames()
 
-ee = EmojisEmoticons()
-print(ee.getEmojiTFIDF())
+# ee = EmojisEmoticons()
+# print(ee.getEmojiTFIDF())

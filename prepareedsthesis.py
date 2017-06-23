@@ -10,7 +10,7 @@ import re
 
 from dateutil.parser import parse
 
-from features.POSFeature import POSFeature
+# from features.POSFeature import POSFeature
 from utility.PostCleaner import PostCleaner
 
 
@@ -29,7 +29,7 @@ def addposts():
     cursor.execute('SET CHARACTER SET utf8mb4;')
     cursor.execute('SET character_set_connection=utf8mb4;')
 
-    with open('results.json') as data_file:
+    with open('result.json') as data_file:
         data = json.load(data_file)
 
     philtz = pytz.timezone("Asia/Manila")
@@ -37,7 +37,7 @@ def addposts():
     for i in data:
 
         query = 'Select * from User where Username = %s'
-        cursor.execute(query, i['experiment_id'])
+        cursor.execute(query, i['experiment_ID'])
         date_object = parse(i['created_at'])
         philver = date_object.astimezone(philtz)
 
@@ -53,12 +53,12 @@ def addposts():
                 postContent = ' '.join(tokenizedPost)
                 postContent = postCleaner.fixAcronymSpaces(postContent)
 
-                engPOS = nltk.pos_tag(tokenizedPost)
-                engPOS = '-'.join([posTag[1] for posTag in engPOS])
+                # engPOS = nltk.pos_tag(tokenizedPost)
+                # engPOS = '-'.join([posTag[1] for posTag in engPOS])
 
                 try:
-                    cursor.execute('INSERT INTO Post(User, Text, PostTime, EngPOS) VALUES (%s,%s,%s,%s) ',
-                                   (id, postContent, philver.strftime('%Y-%m-%d %H:%M:%S'), engPOS))
+                    cursor.execute('INSERT INTO Post(User, Text, Time) VALUES (%s,%s,%s) ',
+                                   (id, i['text'], philver.strftime('%Y-%m-%d %H:%M:%S')))
                 except Exception as e:
                     print('fuuu', str(e))
 
@@ -94,4 +94,4 @@ def fixjson():
 
 #fixjson()
 addusers()
-# addposts()
+addposts()

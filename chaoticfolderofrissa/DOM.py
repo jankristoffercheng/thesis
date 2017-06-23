@@ -2,20 +2,49 @@ import pymysql
 import pandas as pd
 class DOM:
     def getConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='1234', db='thesisdb', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterdb', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
-    def getData(self):
-        conn = self.getConnection()
+    def getTwitterConnection(self):
+        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterdbmerged', charset='utf8mb4',
+                               cursorclass=pymysql.cursors.DictCursor, autocommit=True)
+
+    def getFacebookConnection(self):
+        return pymysql.connect(host='localhost', user='root', password='1234', db='facebookdb', charset='utf8mb4',
+                               cursorclass=pymysql.cursors.DictCursor, autocommit=True)
+
+    def getData(self, conn):
         cursor = conn.cursor()
 
-        sql = "SELECT P.User, P.Text, hour(P.PostTime) as Time, P.CmbPOS, (DATE_FORMAT(CURDATE(), '%Y') - DATE_FORMAT(U.Birthdate, '%Y') - (DATE_FORMAT(CURDATE(), '00-%m-%d') < DATE_FORMAT(U.Birthdate, '00-%m-%d'))) AS Age, U.Gender  FROM post P, user U WHERE P.User = U.Id"
+        sql = "SELECT P.Id, P.User, P.Text, hour(P.Time) as Time, P.CmbPOS, U.Age AS Age, U.Gender, U.Batch  FROM post P, user U WHERE P.User = U.Id"
         cursor.execute(sql)
         rows = cursor.fetchall()
-        data = {'Features': [[row['User'],row['Text'],row['Time'], row['CmbPOS']] for row in rows], 'Results': [[row['Age'], row['Gender']] for row in rows]}
+        data = {'Features': [[row['User'],row['Text'],row['Time'], row['CmbPOS'], row['Batch']] for row in rows], 'Results': [[row['Age'], row['Gender']] for row in rows]}
 
-        X = pd.DataFrame(data['Features'], columns=['User', 'Text', 'PostTime', 'POS'])
+        return data
+
+
+    def getFBData(self):
+        data =  self.getData(self.getFacebookConnection())
+
+        X = pd.DataFrame(data['Features'], columns=['User', 'Text', 'PostTime', 'POS', 'Batch'])
         y=pd.DataFrame(data['Results'], columns=['Age', 'Gender'])
+
+        return X,y
+
+    def getTwitterData(self):
+        data = self.getData(self.getTwitterConnection())
+
+        X = pd.DataFrame(data['Features'], columns=['User', 'Text', 'PostTime', 'POS', 'Batch'])
+        y=pd.DataFrame(data['Results'], columns=['Age', 'Gender'])
+
+        return X,y
+
+    def getMergedData(self):
+        tdata = self.getData(self.getTwitterConnection())
+        fdata = self.getData(self.getFacebookConnection())
+        X = pd.DataFrame(tdata['Features']+fdata['Features'], columns=['User', 'Text', 'PostTime', 'POS', 'Batch'])
+        y=pd.DataFrame(tdata['Results']+fdata['Results'], columns=['Age', 'Gender'])
 
         return X,y
 

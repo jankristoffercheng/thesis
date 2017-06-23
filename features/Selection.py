@@ -1,6 +1,8 @@
 import pandas
 import numpy
 from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_selection import SelectFdr
+from sklearn.feature_selection import SelectFpr
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.feature_selection import mutual_info_classif
@@ -10,7 +12,7 @@ from sklearn.decomposition import PCA
 
 class Selection:
     def featureSelectChi2(self, num_features, data, result):
-        test = SelectKBest(chi2, k=num_features)
+        test = SelectFpr(chi2)
         fit = test.fit(data, result)
         # summarize scores
         # numpy.set_printoptions(precision=3)
@@ -20,7 +22,7 @@ class Selection:
         return features, test.get_support()
 
     def featureSelectMutualClassif(self, num_features, data, result):
-        test = SelectKBest(mutual_info_classif, k=num_features)
+        test = SelectFpr(mutual_info_classif)
         fit = test.fit(data, result)
         # summarize scores
         # numpy.set_printoptions(precision=3)
@@ -30,7 +32,7 @@ class Selection:
         return features, test.get_support()
 
     def featureSelectMutualRegress(self, num_features, data, result):
-        test = SelectKBest(mutual_info_regression, k=num_features)
+        test = SelectFpr(mutual_info_regression)
         fit = test.fit(data, result)
         # summarize scores
         # numpy.set_printoptions(precision=3)
