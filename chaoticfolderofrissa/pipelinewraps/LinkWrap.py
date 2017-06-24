@@ -35,6 +35,6 @@ class LinkWrap(TransformerMixin):
         df = pd.SparseDataFrame(data=[pd.SparseSeries(data[i].toarray().ravel())
                                        for i in np.arange(data.shape[0])],
                                  columns=["Lnk."+freq for freq in self.vectorizer.get_feature_names()])
-        print("1")
+        # print("1")
         #df=DataFrame(data=data.todense(), columns=list(X.columns.values))
         return df

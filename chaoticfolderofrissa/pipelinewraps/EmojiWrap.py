@@ -23,7 +23,7 @@ class EmojiWrap(TransformerMixin):
         data = self.emoji.getEmojiTFIDF(X)
         df = pd.DataFrame(data=data.todense(),
                                  columns=["Soc."+freq for freq in self.emoji.getLabels()])
-        print("1")
+        # print("1")
         #df=DataFrame(data=data.todense(), columns=list(X.columns.values))
-        print(df.shape)
+        # print(df.shape)
         return df

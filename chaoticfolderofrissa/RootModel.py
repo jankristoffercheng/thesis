@@ -48,27 +48,27 @@ class RootModel:
     def getTestingUser(self, ind):
         temp = self.data.loc[self.data['Batch'] == ind+1]
         return temp['User']
-
-    def __evaluateUserFold(self, predictions, user, X, y):
-        useres = []
-        trueres = []
-        ind = 0
-        i = 1
-        while (i < len(X.index)):
-            if (user.loc[i] != user.loc[ind] or i == len(X.index) - 1):
-                if(i==len(X.index) -1):
-                    df = predictions[ind:i]
-                else:
-                    df = predictions[ind:i - 1]
-
-                counter = Counter(df)
-                useres.append(counter.most_common(1)[0][0])
-                trueres.append(y.loc[ind])
-                ind = i
-
-            i += 1
-
-        return useres, trueres
+    #
+    # def __evaluateUserFold(self, predictions, user, X, y):
+    #     useres = []
+    #     trueres = []
+    #     ind = 0
+    #     i = 1
+    #     while (i < len(X.index)):
+    #         if (user.loc[i] != user.loc[ind] or i == len(X.index) - 1):
+    #             if(i==len(X.index) -1):
+    #                 df = predictions[ind:i]
+    #             else:
+    #                 df = predictions[ind:i - 1]
+    #
+    #             counter = Counter(df)
+    #             useres.append(counter.most_common(1)[0][0])
+    #             trueres.append(y.loc[ind])
+    #             ind = i
+    #
+    #         i += 1
+    #
+    #     return useres, trueres
 
     def evaluateKfold(self, train_predictions=None, test_predictions=None):
         if(train_predictions is None or test_predictions is None):
@@ -79,23 +79,23 @@ class RootModel:
 
         for i in range(0,10):
             # print("evaluate")
-            trainUser = self.getTrainingUser(i).reset_index(drop=True)
-            trainX = self.getTrainingX(i).reset_index(drop=True)
+            # trainUser = self.getTrainingUser(i).reset_index(drop=True)
+            # trainX = self.getTrainingX(i).reset_index(drop=True)
             trainY = self.getTrainingy(i).reset_index(drop=True)
 
-            useres, trueres = self.__evaluateUserFold(train_predictions[i], trainUser, trainX, trainY)
-            train_results['Post'].append(metrics.accuracy_score(trainY, pd.Series(train_predictions[i])))
-            train_results['User'].append(metrics.accuracy_score(trueres, useres))
+            # useres, trueres = self.__evaluateUserFold(train_predictions[i], trainUser, trainX, trainY)
+            train_results['User'].append(metrics.accuracy_score(trainY, pd.Series(train_predictions[i])))
+            # train_results['User'].append(metrics.accuracy_score(trueres, useres))
 
-            testUser = self.getTestingUser(i).reset_index(drop=True)
-            testX = self.getTestingX(i).reset_index(drop=True)
+            # testUser = self.getTestingUser(i).reset_index(drop=True)
+            # testX = self.getTestingX(i).reset_index(drop=True)
             testY = self.getTestingy(i).reset_index(drop=True)
 
-            useres, trueres = self.__evaluateUserFold(test_predictions[i], testUser, testX, testY)
-            print(test_predictions[i])
-            print(useres)
-            test_results['Post'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[i])))
-            test_results['User'].append(metrics.accuracy_score(trueres, useres))
+            # useres, trueres = self.__evaluateUserFold(test_predictions[i], testUser, testX, testY)
+            # print(test_predictions[i])
+            # print(useres)
+            test_results['User'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[i])))
+            # test_results['User'].append(metrics.accuracy_score(trueres, useres))
 
         return train_results, test_results
 

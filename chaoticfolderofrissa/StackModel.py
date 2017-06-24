@@ -78,21 +78,21 @@ class StackModel:
         test_results = {'Post': [], 'User': []}
 
         for i in range(0,10):
-            trainUser = self.getTrainingUser(i).reset_index(drop=True)
-            trainX = self.getTrainingX(i).reset_index(drop=True)
+            # trainUser = self.getTrainingUser(i).reset_index(drop=True)
+            # trainX = self.getTrainingX(i).reset_index(drop=True)
             trainY = self.getTrainingy(i).reset_index(drop=True)
 
-            useres, trueres = self.__evaluateUserFold(train_predictions[i], trainUser, trainX, trainY)
-            train_results['Post'].append(metrics.accuracy_score(trainY, pd.Series(train_predictions[i])))
-            train_results['User'].append(metrics.accuracy_score(trueres, useres))
+            # useres, trueres = self.__evaluateUserFold(train_predictions[i], trainUser, trainX, trainY)
+            train_results['User'].append(metrics.accuracy_score(trainY, pd.Series(train_predictions[i])))
+            # train_results['User'].append(metrics.accuracy_score(trueres, useres))
 
-            testUser = self.getTestingUser(i).reset_index(drop=True)
-            testX = self.getTestingX(i).reset_index(drop=True)
+            # testUser = self.getTestingUser(i).reset_index(drop=True)
+            # testX = self.getTestingX(i).reset_index(drop=True)
             testY = self.getTestingy(i).reset_index(drop=True)
 
-            useres, trueres = self.__evaluateUserFold(test_predictions[i], testUser, testX, testY)
-            test_results['Post'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[i])))
-            test_results['User'].append(metrics.accuracy_score(trueres, useres))
+            # useres, trueres = self.__evaluateUserFold(test_predictions[i], testUser, testX, testY)
+            test_results['User'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[i])))
+            # test_results['User'].append(metrics.accuracy_score(trueres, useres))
 
         return train_results, test_results
 

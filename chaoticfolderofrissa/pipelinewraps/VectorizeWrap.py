@@ -9,7 +9,7 @@ class VectorizeWrap(TransformerMixin):
         mlb = MultiLabelBinarizer()
         temp = X.apply(lambda x: [x])
         data = DataFrame( mlb.fit_transform(temp))
-        print("Vectorize", data.shape)
+        # print("Vectorize", data.shape)
         return data
 
     def fit(self, X, y=None, **fit_params):

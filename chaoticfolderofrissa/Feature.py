@@ -1,4 +1,5 @@
 from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import LogisticRegression
 
@@ -12,12 +13,14 @@ import numpy as np
 
 class Feature:
 
-    def __init__(self, X, y, source, freqdata):
+    def __init__(self, X, y, source, data=None):
         self.X,self.y = X, y
         self.y['Gender'] = GenderWrap().fit_transform(self.y['Gender'])
         self.y['Age'] = AgeRangeWrap().fit_transform(self.y['Age'])
-        temp = pd.read_csv("data/"+source+"/raw/features_cmp.csv", encoding = "ISO-8859-1")
-        self.features = pd.concat([temp,freqdata], axis=1)
+        if data is None:
+            self.features = pd.read_csv("data/"+source+"/raw/features_fin.csv", encoding = "ISO-8859-1", index_col=0)
+        else:
+            self.features = data
 
     def applySelection(self, selection, type):
         # print(self.y[['Gender', 'Age']])
@@ -39,7 +42,7 @@ class Feature:
         return df
 
     def getFeatures(self, selection, mode):
-        if(type(selection) is PCA):
+        if(type(selection) is TruncatedSVD):
             result = pd.concat([self.X, self.y,
                                 self.applyExtraction(selection)],
                                axis=1)

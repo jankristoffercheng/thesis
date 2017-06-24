@@ -19,10 +19,10 @@ class TFIDFWrap(TransformerMixin):
 
     def transform(self, X, y=None, **transform_params):
         data=self.tfidf_transformer.transform(X)
-        print(type(data))
+        # print(type(data))
         df = pd.SparseDataFrame(data=[pd.SparseSeries(data[i].toarray().ravel())
                                        for i in np.arange(data.shape[0])],
                                  columns=list(X.columns.values))
-        print("1")
+        # print("1")
         #df=DataFrame(data=data.todense(), columns=list(X.columns.values))
         return df

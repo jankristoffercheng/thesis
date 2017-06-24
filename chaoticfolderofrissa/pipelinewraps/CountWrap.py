@@ -10,7 +10,7 @@ from utility.DataCleaner import DataCleaner
 class CountWrap(TransformerMixin):
 
     def __init__(self, target=None):
-        self.vectorizer = CountVectorizer()
+        self.vectorizer = CountVectorizer(stop_words='english', max_df=0.1, min_df=0.01)
 
     def fit(self, X, *args, **kwargs):
         data = X.apply(clean)

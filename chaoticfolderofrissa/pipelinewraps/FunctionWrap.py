@@ -41,5 +41,5 @@ class FunctionWrap(TransformerMixin):
             data.append(self.features.getAdpositionCount(row))
 
             result.loc[index] = data
-        print(result.shape)
+        # print(result.shape)
         return result

@@ -17,6 +17,8 @@ class EmojisEmoticons:
             if result != '':
                 #result = result.replace('b\'\\u', '\'\\u')
                 emojiList.append(result.encode('unicode_escape'))
+            else:
+                emojiList.append("")
 
         print("emoji post:",emojiList)
         return self.tfidf.get_training_TFIDF(emojiList)

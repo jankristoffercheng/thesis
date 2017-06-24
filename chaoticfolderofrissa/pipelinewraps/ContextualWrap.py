@@ -32,9 +32,9 @@ class ContextualWrap(TransformerMixin):
             data.append(Context().process(text))
         dtm  = self.vectorizer.transform(data)
         data=self.tfidf_transformer.transform(dtm)
-        print(type(data))
+        # print(type(data))
         df = pd.DataFrame(data=data.todense(),
                                  columns=["Soc."+freq for freq in self.vectorizer.get_feature_names()])
-        print(df.shape)
+        # print(df.shape)
         #df=DataFrame(data=data.todense(), columns=list(X.columns.values))
         return df
