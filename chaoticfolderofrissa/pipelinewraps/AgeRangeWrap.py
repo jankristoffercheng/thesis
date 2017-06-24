@@ -24,6 +24,6 @@ def enrange(x):
         return 1
     elif(x>=34 and x<=44): return 2
     elif(x>-45 and x<=54): return 3
-    elif(x>=55 and x<=64): return 4
+    elif(x>=55 and x<=65): return 4
 
     return -1
