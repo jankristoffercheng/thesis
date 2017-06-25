@@ -10,41 +10,32 @@ import pandas as pd
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import svm
-
+import numpy as np
 
 class RootModel:
 
     def __init__(self, data, type, modelType, k=10):
-        # self.user = data['User']
         self.data = data
-        # self.X = data.iloc[:, 6:]
-        # self.y = data[type]
         self.type=type
-        #
-        # self.train_index=[]
-        # self.test_index=[]
-        # for train, test in GroupKFold(n_splits = k).split(self.X, self.y, groups=self.user):
-        #     self.train_index.append(train)
-        #     self.test_index.append(test)
         self.models=[]
         self.__kFold(modelType)
 
     def getTrainingX(self, ind):
         temp = self.data.loc[self.data['Batch'] != ind+1]
-        return temp.iloc[:, 7:]
+        return temp.iloc[:, 4:]
     def getTrainingy(self, ind):
         temp = self.data.loc[self.data['Batch'] != ind+1]
-        return temp[type]
+        return temp[self.type]
     def getTrainingUser(self, ind):
         temp = self.data.loc[self.data['Batch'] != ind+1]
         return temp['User']
 
     def getTestingX(self, ind):
         temp = self.data.loc[self.data['Batch'] == ind+1]
-        return temp.iloc[:, 7:]
+        return temp.iloc[:, 4:]
     def getTestingy(self, ind):
         temp = self.data.loc[self.data['Batch'] == ind+1]
-        return temp[type]
+        return temp[self.type]
     def getTestingUser(self, ind):
         temp = self.data.loc[self.data['Batch'] == ind+1]
         return temp['User']
@@ -78,24 +69,10 @@ class RootModel:
         test_results = {'Post':[],'User':[]}
 
         for i in range(0,10):
-            # print("evaluate")
-            # trainUser = self.getTrainingUser(i).reset_index(drop=True)
-            # trainX = self.getTrainingX(i).reset_index(drop=True)
-            trainY = self.getTrainingy(i).reset_index(drop=True)
-
-            # useres, trueres = self.__evaluateUserFold(train_predictions[i], trainUser, trainX, trainY)
-            train_results['User'].append(metrics.accuracy_score(trainY, pd.Series(train_predictions[i])))
-            # train_results['User'].append(metrics.accuracy_score(trueres, useres))
-
-            # testUser = self.getTestingUser(i).reset_index(drop=True)
-            # testX = self.getTestingX(i).reset_index(drop=True)
-            testY = self.getTestingy(i).reset_index(drop=True)
-
-            # useres, trueres = self.__evaluateUserFold(test_predictions[i], testUser, testX, testY)
-            # print(test_predictions[i])
-            # print(useres)
-            test_results['User'].append(metrics.accuracy_score(testY, pd.Series(test_predictions[i])))
-            # test_results['User'].append(metrics.accuracy_score(trueres, useres))
+            trainY = self.getTrainingy(i)
+            train_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
+            testY = self.getTestingy(i)
+            test_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
 
         return train_results, test_results
 
@@ -103,13 +80,13 @@ class RootModel:
         train_predictions = []
         test_predictions = []
         for i in range(0,10):
-            trainX = self.getTrainingX(i).reset_index(drop=True)
+            trainX = self.getTrainingX(i)
             train_pred = self.models[i].predict(trainX)
-            train_predictions.append(train_pred.tolist())
+            train_predictions.append(pd.Series(data=train_pred, index=trainX.index.values))
 
-            testX = self.getTestingX(i).reset_index(drop=True)
+            testX = self.getTestingX(i)
             test_pred = self.models[i].predict(testX)
-            test_predictions.append(test_pred.tolist())
+            test_predictions.append(pd.Series(data=test_pred, index=testX.index.values))
 
         return train_predictions,test_predictions
 

@@ -53,11 +53,23 @@ class Feature:
         return result
 
     def useLasso(self, mode):
-        lr = LogisticRegression(penalty="l1", dual=False).fit(self.features, self.y)
+        if (mode == "Both"):
+            lr = LogisticRegression(penalty="l1", dual=False).fit(self.features, self.y['Gender'].map(str) + self.y['Age'].map(str))
+        else:
+            lr = LogisticRegression(penalty="l1", dual=False).fit(self.features, self.y[mode])
         model = SelectFromModel(lr, prefit=True)
         X_new = model.transform(self.features)
-        print(X_new.get_support)
-        result = pd.DataFrame(data=X_new.todense(), columns=X_new.get_support())
+        orgcol = self.features.columns
+        cols=[]
+        print(orgcol)
+        print(model.get_support())
+        for stat, labl in zip(model.get_support(), orgcol):
+            print(stat,type(stat))
+            if(stat==True): cols.append(labl)
+
+        print(X_new.shape)
+        print(cols)
+        result = pd.DataFrame(data=X_new, columns=cols)
         return pd.concat([self.X, self.y,
                                 result],
                                axis=1)
