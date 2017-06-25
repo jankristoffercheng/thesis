@@ -19,7 +19,8 @@ class Structure:
     def getAvgNWordPerSentence(self, text):
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nSentences = self.getNSentences(text)
-
+        if nSentences == 0:
+            return 0
         return nWords//nSentences
 
     def getNSentenceBegUpper(self,text):
@@ -47,13 +48,15 @@ class Structure:
     def getAvgNSentencePerParagraph(self,text):
         nSentences = self.getNSentences(text)
         nParagraphs = self.getNParagraphs(text)
-
+        if nParagraphs == 0:
+            return 0
         return nSentences//nParagraphs
 
     def getAvgNWordPerParagraph(self,text):
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nParagraphs = self.getNParagraphs(text)
-
+        if nParagraphs == 0:
+            return 0
         return nWords//nParagraphs
 
     #not sure if correct implementation
