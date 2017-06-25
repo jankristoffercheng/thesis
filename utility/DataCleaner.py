@@ -16,4 +16,6 @@ class DataCleaner:
 
         return text
 
+    def clean_email(self, post_content):
+        return self.email_cleaner.sub('',post_content, count=0)
 
