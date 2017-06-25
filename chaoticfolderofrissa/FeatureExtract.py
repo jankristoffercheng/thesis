@@ -5,6 +5,7 @@ from chaoticfolderofrissa.pipelinewraps.ContextualWrap import ContextualWrap
 from chaoticfolderofrissa.pipelinewraps.EmojiWrap import EmojiWrap
 from chaoticfolderofrissa.pipelinewraps.FunctionWrap import FunctionWrap
 from chaoticfolderofrissa.pipelinewraps.ItemSelector import ItemSelector
+from chaoticfolderofrissa.pipelinewraps.LinkWrap import LinkWrap
 from chaoticfolderofrissa.pipelinewraps.POSSeqWrap import POSSeqWrap
 from chaoticfolderofrissa.pipelinewraps.PostTimeWrap import PostTimeWrap
 from chaoticfolderofrissa.pipelinewraps.StructureWrap import StructureWrap
@@ -39,9 +40,9 @@ soc = {'label':'Soc.','categories':("swear",
 class FeatureExtract:
     def __init__(self, source):
         self.source=source
-        # self.posSeqPipeline = Pipeline([
-        #     ('get_top', POSSeqWrap())
-        # ])
+        self.posSeqPipeline = Pipeline([
+            ('get_top', POSSeqWrap())
+        ])
         self.timePipeline = Pipeline([
             ('extract', ItemSelector('PostTime')),
             ('enrange', PostTimeWrap())
@@ -58,6 +59,11 @@ class FeatureExtract:
             ('extract', ItemSelector('Text')),
             ('process', StructureWrap())
         ])
+        self.linkPipeline = Pipeline([
+            ('extract', ItemSelector('Text')),
+            ('process', LinkWrap())
+        ])
+
         self.socLinContextPipeline = Pipeline([
             ('extract', ItemSelector('Text')),
             ('contextual', ContextualWrap())
@@ -98,10 +104,12 @@ class FeatureExtract:
 
 
     def fit_transform(self, X):
+        posFeatures = self.posSeqPipeline.fit_transform(X)
         timeFeatures = self.timePipeline.fit_transform(X)
         wordFeatures = self.wordPipeline.fit_transform(X)
         characterFeatures = self.characterPipeline.fit_transform(X)
         structureFeatures = self.structurePipeline.fit_transform(X)
+        linkFeatures = self.linkPipeline.fit_transform(X)
         socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), self.socLinEmojiPipeline.fit_transform(X),
                                     self.socLinFunctionPipeline.fit_transform(X)], axis=1)
         data = X['Text'].apply(self.clean)
@@ -109,13 +117,15 @@ class FeatureExtract:
         freqData = pd.DataFrame(data=freq.todense(),
                                 columns=["Frq." + freq for freq in self.tfidf.getFeatureNames()])
 
-        return pd.concat([freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, socLinFeatures], axis=1)
+        return pd.concat([posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, linkFeatures, socLinFeatures], axis=1)
 
     def transform(self, X):
+        posFeatures = self.posSeqPipeline.fit_transform(X)
         timeFeatures = self.timePipeline.transform(X)
         wordFeatures = self.wordPipeline.transform(X)
         characterFeatures = self.characterPipeline.transform(X)
         structureFeatures = self.structurePipeline.transform(X)
+        linkFeatures = self.linkPipeline.fit_transform(X)
         socLinFeatures = pd.concat([self.socLinContextPipeline.transform(X), self.socLinEmojiPipeline.transform(X),
                                     self.socLinFunctionPipeline.transform(X)], axis=1)
         data = X['Text'].apply(self.clean)
@@ -124,7 +134,7 @@ class FeatureExtract:
                                 columns=["Frq." + freq for freq in self.tfidf.getFeatureNames()])
 
         return pd.concat(
-            [freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, socLinFeatures], axis=1)
+            [posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, linkFeatures, socLinFeatures], axis=1)
 
     # def get_tfidf(self):
 
