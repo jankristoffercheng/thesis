@@ -71,6 +71,15 @@ class RootModel:
         train_precision_results = {'Post': [], 'User': []}
         test_precision_results = {'Post': [], 'User': []}
 
+        train_recall_results = {'Post': [], 'User': []}
+        test_recall_results = {'Post': [], 'User': []}
+
+        train_kappa_results = {'Post': [], 'User': []}
+        test_kappa_results = {'Post': [], 'User': []}
+
+        train_fmeasure_results = {'Post': [], 'User': []}
+        test_fmeasure_results = {'Post': [], 'User': []}
+
         for i in range(0,10):
             trainY = self.getTrainingy(i)
             testY = self.getTestingy(i)
@@ -79,9 +88,18 @@ class RootModel:
             test_accuracy_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
 
             train_precision_results['User'].append(metrics.precision_score(trainY, train_predictions[i]))
+            test_precision_results['User'].append(metrics.precision_score(testY, test_predictions[i]))
 
+            train_recall_results['User'].append(metrics.recall_score(trainY, train_predictions[i]))
+            test_recall_results['User'].append(metrics.recall_score(testY, test_predictions[i]))
 
-        return train_accuracy_results, test_accuracy_results
+            train_kappa_results['User'].append(metrics.cohen_kappa_score(trainY, train_predictions[i]))
+            test_kappa_results['User'].append(metrics.cohen_kappa_score(testY, test_predictions[i]))
+
+            train_fmeasure_results['User'].append(metrics.f1_score(trainY, train_predictions[i]))
+            test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i]))
+
+        return train_accuracy_results, test_accuracy_results, train_precision_results, test_precision_results, train_recall_results, test_recall_results, train_kappa_results, test_kappa_results, train_fmeasure_results, test_fmeasure_results
 
     def getPredictions(self):
         train_predictions = []
