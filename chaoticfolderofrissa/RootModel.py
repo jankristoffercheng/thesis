@@ -65,16 +65,23 @@ class RootModel:
         if(train_predictions is None or test_predictions is None):
             train_predictions, test_predictions = self.getPredictions()
 
-        train_results = {'Post':[],'User':[]}
-        test_results = {'Post':[],'User':[]}
+        train_accuracy_results = {'Post':[],'User':[]}
+        test_accuracy_results = {'Post':[],'User':[]}
+
+        train_precision_results = {'Post': [], 'User': []}
+        test_precision_results = {'Post': [], 'User': []}
 
         for i in range(0,10):
             trainY = self.getTrainingy(i)
-            train_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
             testY = self.getTestingy(i)
-            test_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
 
-        return train_results, test_results
+            train_accuracy_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
+            test_accuracy_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
+
+            train_precision_results['User'].append(metrics.precision_score(trainY, train_predictions[i]))
+
+
+        return train_accuracy_results, test_accuracy_results
 
     def getPredictions(self):
         train_predictions = []
