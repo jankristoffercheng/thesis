@@ -112,7 +112,7 @@ class POSFeature:
                 if(len(engTags) != len(filTags)):
                     for i in range(startIndex, wordCount + startIndex):
                         finalPOSTags.append(engTags[i])
-                    print("not same length...............................", sentence)
+                    print("not same length...............................[",wordCount,"] ", sentence)
                     #time.sleep(5.5)
                 else:
                     for i in range(startIndex, wordCount + startIndex):
