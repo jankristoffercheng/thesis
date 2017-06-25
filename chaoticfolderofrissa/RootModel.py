@@ -132,6 +132,6 @@ class RootModel:
 
             tX, ty = self.getTrainingX(i), self.getTrainingy(i)
 
-            model.fit(tX, ty)
+            model = model.fit(tX, ty)
 
             self.models.append(model)

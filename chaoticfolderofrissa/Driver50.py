@@ -54,27 +54,27 @@ def dimensionReduction(X ,y, source, data=None):
 
     for i in range(10, 61, 10):
         gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Gender')
-        gen_data.to_csv('data/'+source+'/chi2/gender_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/chi2/gender_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Age')
-        gen_data.to_csv('data/'+source+'/chi2/age_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/chi2/age_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Both')
-        gen_data.to_csv('data/'+source+'/chi2/both_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/chi2/both_'+str(i)+'.csv')
 
     for i in range(100,1001,100):
         gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Gender')
-        gen_data.to_csv('data/'+source+'/svd/gender_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/svd/gender_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Age')
-        gen_data.to_csv('data/'+source+'/svd/age_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/svd/age_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Both')
-        gen_data.to_csv('data/'+source+'/svd/both_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/svd/both_'+str(i)+'.csv')
 
     for i in range(10,61,10):
         gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Gender')
-        gen_data.to_csv('data/'+source+'/mi/gender_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/mi/gender_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Age')
-        gen_data.to_csv('data/'+source+'/mi/age_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/mi/age_'+str(i)+'.csv')
         gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Both')
-        gen_data.to_csv('data/'+source+'/mi/both_'+i+'.csv')
+        gen_data.to_csv('data/'+source+'/mi/both_'+str(i)+'.csv')
 
     gen_data = feature.useLasso(mode='Gender')
     gen_data.to_csv('data/'+source+'/lasso/gender.csv')
@@ -89,9 +89,9 @@ def getSpecificFeatures(data, features):
 
 def get_Data_from_CSV(source, fs, param=None):
     if(fs=="lasso"):
-        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+".csv", index_col=0, encoding='latin1')
-        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+".csv", index_col=0, encoding='latin1')
-        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+param+".csv", index_col=0, encoding='latin1')
+        age_data = pd.read_csv("data/" + source + "/" + fs + "/age.csv", index_col=0, encoding='latin1')
+        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender.csv", index_col=0, encoding='latin1')
+        both_data = pd.read_csv("data/" + source + "/" + fs + "/both.csv", index_col=0, encoding='latin1')
     else:
         age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+".csv", index_col=0, encoding='latin1')
         gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+".csv", index_col=0, encoding='latin1')
@@ -135,12 +135,12 @@ X, y = DOM().getTwitterData()
 UX, Uy = DOM().getTwitterUserData()
 source="twitter"
 
-CLASSIFIERS = {
-	"SVM": svm.SVC,
-	"NB": MultinomialNB,
-    "Ridge": RidgeClassifier,
-    "DTC": DecisionTreeClassifier
-}
+CLASSIFIERS = [
+	svm.SVC,
+	MultinomialNB,
+    RidgeClassifier,
+    DecisionTreeClassifier
+]
 SOURCES = [
     "twitter",
     "facebook",
@@ -173,25 +173,25 @@ FEATURE_REDUCTIONS = [
 ]
 
 #1. Prepare features
-fe = FeatureExtract(source)
-data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
-data = data.iloc[:,7:].groupby(data['User']).mean()
-maxmin = MinMaxScaler()
-data.to_csv('data/'+source+'/raw/features_init.csv')
-data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
-data.to_csv('data/'+source+'/raw/features_fin.csv')
+# fe = FeatureExtract(source)
+# data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
+# data = data.iloc[:,7:].groupby(data['User']).mean()
+# maxmin = MinMaxScaler()
+# data.to_csv('data/'+source+'/raw/features_init.csv')
+# data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
+# data.to_csv('data/'+source+'/raw/features_fin.csv')
 
 #3. Dimension Reduction
 # dimensionReduction(UX, Uy, "twitter")
 
 #2. kFold for Parallel
 
-# for source in SOURCES:
-#     for fr in FEATURE_REDUCTIONS:
-#         for classifier in CLASSIFIERS:
-#             age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
-#             evaluate(age_data, gen_data, both_data, classifier)
-#             print(source + " " + fr + " " + classifier + ": ")
+for source in SOURCES:
+    for fr in FEATURE_REDUCTIONS:
+        for classifier in CLASSIFIERS:
+            age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
+            evaluate(age_data, gen_data, both_data, classifier)
+            print(source + " " + fr + " " + classifier + ": ")
 
 
 
