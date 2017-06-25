@@ -20,7 +20,7 @@ class Structure:
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nSentences = self.getNSentences(text)
 
-        return nWords//nSentences
+        return nWords/nSentences
 
     def getNSentenceBegUpper(self,text):
         nCount = 0
@@ -48,13 +48,13 @@ class Structure:
         nSentences = self.getNSentences(text)
         nParagraphs = self.getNParagraphs(text)
 
-        return nSentences//nParagraphs
+        return nSentences/nParagraphs
 
     def getAvgNWordPerParagraph(self,text):
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nParagraphs = self.getNParagraphs(text)
 
-        return nWords//nParagraphs
+        return nWords/nParagraphs
 
     #not sure if correct implementation
     #are spaces counted/considered?
@@ -62,7 +62,7 @@ class Structure:
         nChar = len(text)
         nParagraphs = self.getNParagraphs(text)
 
-        return nChar//nParagraphs
+        return nChar/nParagraphs
 
 # structure = Structure()
 # print(structure.getNSentenceBegUpper("Nag-aral nang masaya ang mga mag-aaral. pupunta sa paaralan ang mga mag-aaral...dito na ba ?"))

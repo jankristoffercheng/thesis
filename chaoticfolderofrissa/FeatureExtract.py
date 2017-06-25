@@ -38,7 +38,7 @@ soc = {'label':'Soc.','categories':("swear",
             "filler")}
 
 class FeatureExtract:
-    def __init__(self, source):
+    def __init__(self, source, mindf, maxdf ):
         self.source=source
         self.posSeqPipeline = Pipeline([
             ('get_top', POSSeqWrap())
@@ -61,17 +61,17 @@ class FeatureExtract:
         ])
         self.linkPipeline = Pipeline([
             ('extract', ItemSelector('Text')),
-            ('process', LinkWrap())
+            ('process', LinkWrap(mindf, maxdf))
         ])
 
         self.socLinContextPipeline = Pipeline([
             ('extract', ItemSelector('Text')),
-            ('contextual', ContextualWrap())
+            ('contextual', ContextualWrap(mindf, maxdf))
         ])
 
         self.socLinEmojiPipeline = Pipeline([
             ('extract', ItemSelector('Text')),
-            ('emoji', EmojiWrap())
+            ('emoji', EmojiWrap(mindf, maxdf))
         ])
 
         self.socLinFunctionPipeline = Pipeline([
@@ -79,7 +79,7 @@ class FeatureExtract:
             ('function', FunctionWrap())
         ])
 
-        self.tfidf = TFIDF()
+        self.tfidf = TFIDF(mindf, maxdf)
 
         # print(X['Text'])
 

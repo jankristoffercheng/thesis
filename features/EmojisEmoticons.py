@@ -4,8 +4,8 @@ from utility.PostCleaner import PostCleaner
 
 class EmojisEmoticons:
 
-    def __init__(self):
-        self.tfidf = TFIDF()
+    def __init__(self, mindf, maxdf):
+        self.tfidf = TFIDF(mindf, maxdf)
 
     def getEmojiTFIDF(self, data):
         # postDAO = PostsDAO()

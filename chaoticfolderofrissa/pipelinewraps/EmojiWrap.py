@@ -12,8 +12,8 @@ from utility.DataCleaner import DataCleaner
 
 class EmojiWrap(TransformerMixin):
 
-    def __init__(self, target=None):
-        self.emoji = EmojisEmoticons()
+    def __init__(self, mindf, maxdf, target=None):
+        self.emoji = EmojisEmoticons(mindf, maxdf)
 
     def fit(self, X, *args, **kwargs):
         return self

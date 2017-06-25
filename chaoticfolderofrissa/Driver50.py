@@ -83,6 +83,7 @@ FEATURE_REDUCTIONS = [
     ["chi2", 60],
 ]
 DOC_FREQS = [ # min = 1%, 5%, 10%; max = 90%, 80%, 70%
+    # [0.01, 0.1]
 	[0.01, 0.90],
 	[0.01, 0.80],
 	[0.01, 0.70],
@@ -98,58 +99,58 @@ DOC_FREQS = [ # min = 1%, 5%, 10%; max = 90%, 80%, 70%
 def clean(x):
     return  DataCleaner().clean_data(x)
 
-def dimensionReduction(X ,y, source, data=None):
+def dimensionReduction(X ,y, source, mindf, maxdf, data=None):
     feature=Feature(X, y, source, data)
     for freq in DOC_FREQS:
         mindf = str(freq[0])
         maxdf = str(freq[1])
         for i in range(10, 61, 10):
             gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/chi2/gender_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/chi2/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/chi2/age_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/chi2/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/chi2/both_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/chi2/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
         for i in range(100,1001,100):
             gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/svd/gender_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/svd/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/svd/age_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/svd/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/svd/both_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/svd/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
         for i in range(10,61,10):
             gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/mi/gender_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/mi/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/mi/age_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/mi/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
             gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/mi/both_'+str(i)+'.csv')
+            gen_data.to_csv('data/'+source+'/mi/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
         gen_data = feature.useLasso(mode='Gender')
-        gen_data.to_csv('data/'+source+'/lasso/gender.csv')
+        gen_data.to_csv('data/'+source+'/lasso/gender_'+mindf+'-'+maxdf+'.csv')
         gen_data = feature.useLasso(mode='Age')
-        gen_data.to_csv('data/'+source+'/lasso/age.csv')
+        gen_data.to_csv('data/'+source+'/lasso/age_'+mindf+'-'+maxdf+'.csv')
         gen_data = feature.useLasso(mode='Both')
-        gen_data.to_csv('data/'+source+'/lasso/both.csv')
+        gen_data.to_csv('data/'+source+'/lasso/both_'+mindf+'-'+maxdf+'.csv')
 
 def getSpecificFeatures(data, features):
     filter_col = [col for col in list(data) if (("." not in col) or (col.startswith(tuple(features))))]
     return data[filter_col]
 
-def get_Data_from_CSV(source, fs, param=None):
+def get_Data_from_CSV(source, mindf, maxdf, fs, param=None):
     param = str(param)
-    # mindf = str(mindf)
-    # maxdf = str(maxdf)
+    mindf = str(mindf)
+    maxdf = str(maxdf)
     if(fs=="lasso"):
-        age_data = pd.read_csv("data/" + source + "/" + fs + "/age.csv", index_col=0, encoding='latin1')
-        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender.csv", index_col=0, encoding='latin1')
-        both_data = pd.read_csv("data/" + source + "/" + fs + "/both.csv", index_col=0, encoding='latin1')
+        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
+        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
+        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
     else:
-        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+".csv", index_col=0, encoding='latin1')
-        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+".csv", index_col=0, encoding='latin1')
-        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+param+".csv", index_col=0, encoding='latin1')
+        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+"_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
+        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+"_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
+        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+param+"_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
 
     return age_data,gen_data,both_data
 
@@ -192,14 +193,14 @@ source="twitter"
 
 #1. Prepare features
 
-# for freq in DOC_FREQS:
-fe = FeatureExtract(source)
-data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
-data = data.iloc[:,7:].groupby(data['User']).mean()
-maxmin = MinMaxScaler()
-data.to_csv('data/'+source+'/raw/features_init_all.csv')
-data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
-data.to_csv('data/'+source+'/raw/features_fin_all.csv')
+for freq in DOC_FREQS:
+    fe = FeatureExtract(source, freq[0], freq[1])
+    data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
+    data = data.iloc[:,7:].groupby(data['User']).mean()
+    maxmin = MinMaxScaler()
+    data.to_csv('data/'+source+'/raw/features_init_'+str(freq[0])+'-'+str(freq[1])+'.csv')
+    data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
+    data.to_csv('data/'+source+'/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv')
 
 #3. Dimension Reduction
 # dimensionReduction(UX, Uy, "twitter")

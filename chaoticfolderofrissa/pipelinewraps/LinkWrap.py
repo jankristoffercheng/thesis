@@ -10,9 +10,9 @@ from utility.DataCleaner import DataCleaner
 
 class LinkWrap(TransformerMixin):
 
-    def __init__(self, target=None):
+    def __init__(self, mindf, maxdf, target=None):
         self.tfidf_transformer = TfidfTransformer()
-        self.vectorizer = CountVectorizer()
+        self.vectorizer = CountVectorizer(stop_words='english', max_df=maxdf, min_df=mindf)
 
     def fit(self, X, *args, **kwargs):
         links = []
