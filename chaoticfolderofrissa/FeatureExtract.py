@@ -115,7 +115,7 @@ class FeatureExtract:
         print("Extracting structure")
         structureFeatures = self.structurePipeline.fit_transform(X)
         print("Extracting socLin")
-        socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), self.socLinEmojiPipeline.fit_transform(X),
+        socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), #oself.socLinEmojiPipeline.fit_transform(X),
                                     self.socLinFunctionPipeline.fit_transform(X)], axis=1)
         data = X['Text'].apply(self.clean)
         freq = self.tfidf.get_training_TFIDF(data)
@@ -139,7 +139,7 @@ class FeatureExtract:
         print("Extracting structure")
         structureFeatures = self.structurePipeline.transform(X)
         print("Extracting socLin")
-        socLinFeatures = pd.concat([self.socLinContextPipeline.transform(X), self.socLinEmojiPipeline.transform(X),
+        socLinFeatures = pd.concat([self.socLinContextPipeline.transform(X), #self.socLinEmojiPipeline.transform(X),
                                     self.socLinFunctionPipeline.transform(X)], axis=1)
         print("Extracting tfidf")
         data = X['Text'].apply(self.clean)
