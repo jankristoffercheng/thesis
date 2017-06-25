@@ -44,6 +44,15 @@ class DOM:
 
         return X,y
 
+
+    def getFBUserData(self):
+        data = self.getUserData(self.getFacebookConnection())
+
+        X = pd.DataFrame(data['Features'], columns=['User', 'Batch'])
+        y=pd.DataFrame(data['Results'], columns=['Age', 'Gender'])
+
+        return X,y
+
     def getFBData(self):
         data =  self.getData(self.getFacebookConnection())
 

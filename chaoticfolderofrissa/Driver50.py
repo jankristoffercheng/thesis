@@ -131,11 +131,9 @@ def evaluate(age_data, gen_data, both_data, model):
     print("Combined Model, Age, Results: " + test_results)
 
 
-
 X, y = DOM().getTwitterData()
 UX, Uy = DOM().getTwitterUserData()
 source="twitter"
-
 
 CLASSIFIERS = {
 	"SVM": svm.SVC,
@@ -175,7 +173,7 @@ FEATURE_REDUCTIONS = [
 ]
 
 #1. Prepare features
-fe = FeatureExtract("twitter")
+fe = FeatureExtract(source)
 data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
 data = data.iloc[:,7:].groupby(data['User']).mean()
 maxmin = MinMaxScaler()
@@ -194,3 +192,18 @@ data.to_csv('data/'+source+'/raw/features_fin.csv')
 #             age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
 #             evaluate(age_data, gen_data, both_data, classifier)
 #             print(source + " " + fr + " " + classifier + ": ")
+
+
+
+#
+# X[['Text']].to_csv("twitterdata.csv")
+
+
+# X, y = DOM().getFBData()
+# UX, Uy = DOM().getFBUserData()
+# source="fb"
+#
+# X[['Text']].to_csv("fbdata.csv")
+
+
+# pd.concat([pd.read_csv('data/fb/raw/features_fin.csv', index_col=0),pd.read_csv('data/twitter/raw/features_fin.csv', index_col=0)],axis=0).to_csv('data/merged/raw/features_fin.csv')
