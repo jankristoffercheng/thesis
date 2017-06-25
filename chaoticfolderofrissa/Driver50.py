@@ -179,6 +179,7 @@ fe = FeatureExtract("twitter")
 data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
 data = data.iloc[:,7:].groupby(data['User']).mean()
 maxmin = MinMaxScaler()
+data.to_csv('data/'+source+'/raw/features_init.csv')
 data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
 data.to_csv('data/'+source+'/raw/features_fin.csv')
 
