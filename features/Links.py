@@ -11,7 +11,10 @@ class Links:
     def get_title(self, link):
         page = requests.get(link)
         soup = BeautifulSoup(page.content, 'html.parser')
-        return soup.title.string
+        title = soup.title.string
+        if 'Twitter' not in title:
+            return title
+        return ''
 
     def get_links(self,text):
 

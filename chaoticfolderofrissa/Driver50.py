@@ -51,72 +51,81 @@ def clean(x):
 
 def dimensionReduction(X ,y, source, data=None):
     feature=Feature(X, y, source, data)
-    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Gender')
-    gen_data.to_csv('data/'+source+'/features_chi2_gender.csv')
-    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Age')
-    gen_data.to_csv('data/'+source+'/features_chi2_age.csv')
-    gen_data = feature.getFeatures(selection=SelectFpr(chi2), mode='Both')
-    gen_data.to_csv('data/'+source+'/features_chi2_both.csv')
 
+    for i in range(10, 61, 10):
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/chi2/gender_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/chi2/age_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/chi2/both_'+i+'.csv')
 
-    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=100), mode='Gender')
-    gen_data.to_csv('data/'+source+'/features_svd_gender.csv')
-    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=100), mode='Age')
-    gen_data.to_csv('data/'+source+'/features_svd_age.csv')
-    gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=100), mode='Both')
-    gen_data.to_csv('data/'+source+'/features_svd_both.csv')
+    for i in range(100,1001,100):
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/svd/gender_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/svd/age_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/svd/both_'+i+'.csv')
 
-    gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=20), mode='Gender')
-    gen_data.to_csv('data/'+source+'/features_mi_gender.csv')
-    gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=20), mode='Age')
-    gen_data.to_csv('data/'+source+'/features_mi_age.csv')
-    gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=20), mode='Both')
-    gen_data.to_csv('data/'+source+'/features_mi_both.csv')
-
+    for i in range(10,61,10):
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/mi/gender_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/mi/age_'+i+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/mi/both_'+i+'.csv')
 
     gen_data = feature.useLasso(mode='Gender')
-    gen_data.to_csv('data/'+source+'/features_lasso_gender.csv')
+    gen_data.to_csv('data/'+source+'/lasso/gender.csv')
     gen_data = feature.useLasso(mode='Age')
-    gen_data.to_csv('data/'+source+'/features_lasso_age.csv')
+    gen_data.to_csv('data/'+source+'/lasso/age.csv')
     gen_data = feature.useLasso(mode='Both')
-    gen_data.to_csv('data/'+source+'/features_lasso_both.csv')
+    gen_data.to_csv('data/'+source+'/lasso/both.csv')
 
 def getSpecificFeatures(data, features):
     filter_col = [col for col in list(data) if (("." not in col) or (col.startswith(tuple(features))))]
     return data[filter_col]
 
-def evaluate(file, source):
-    age_data = pd.read_csv("data/"+source+"/"+file+"_age.csv", index_col=0, encoding='latin1')
-    gen_data = pd.read_csv("data/"+source+"/"+file+"_gender.csv", index_col=0, encoding='latin1')
-    both_data = pd.read_csv("data/"+source+"/"+file+"_both.csv", index_col=0, encoding='latin1')
+def get_Data_from_CSV(source, fs, param=None):
+    if(fs=="lasso"):
+        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+".csv", index_col=0, encoding='latin1')
+        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+".csv", index_col=0, encoding='latin1')
+        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+param+".csv", index_col=0, encoding='latin1')
+    else:
+        age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+param+".csv", index_col=0, encoding='latin1')
+        gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+param+".csv", index_col=0, encoding='latin1')
+        both_data = pd.read_csv("data/" + source + "/" + fs + "/both_"+param+".csv", index_col=0, encoding='latin1')
 
+    return age_data,gen_data,both_data
 
-    age_model = RootModel(data=age_data, type='Age', modelType=svm.SVC)
+def evaluate(age_data, gen_data, both_data, model):
+    age_model = RootModel(data=age_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
     print(train_results)
     print(test_results)
 
-    gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=svm.SVC)
+    gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
     print(train_results)
     print(test_results)
 
-    gen_model = RootModel(data=gen_data, type='Gender', modelType=svm.SVC)
+    gen_model = RootModel(data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
     print(train_results)
     print(test_results)
 
-    age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=svm.SVC)
+    age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
     print(train_results)
     print(test_results)
 
-    both_model = RootModel(data=both_data, type='Gender', modelType=svm.SVC)
+    both_model = RootModel(data=both_data, type='Gender', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
     print(train_results)
     print(test_results)
 
-    both_model = RootModel(data=both_data, type='Age', modelType=svm.SVC)
+    both_model = RootModel(data=both_data, type='Age', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
     print(train_results)
     # print(test_results)
@@ -126,6 +135,44 @@ def evaluate(file, source):
 X, y = DOM().getTwitterData()
 UX, Uy = DOM().getTwitterUserData()
 source="twitter"
+
+
+CLASSIFIERS = {
+	"SVM": svm.SVC,
+	"NB": MultinomialNB,
+    "Ridge": RidgeClassifier,
+    "DTC": DecisionTreeClassifier
+}
+SOURCES = [
+    "twitter",
+    "facebook",
+    "merged"
+]
+FEATURE_REDUCTIONS = [
+	["lasso", None],
+    ["svd", 100],
+    ["svd", 200],
+    ["svd", 300],
+    ["svd", 400],
+    ["svd", 500],
+    ["svd", 600],
+    ["svd", 700],
+    ["svd", 800],
+    ["svd", 900],
+    ["svd", 1000],
+    ["mi", 10],
+    ["mi", 20],
+    ["mi", 30],
+    ["mi", 40],
+    ["mi", 50],
+    ["mi", 60],
+    ["chi2", 10],
+    ["chi2", 20],
+    ["chi2", 30],
+    ["chi2", 40],
+    ["chi2", 50],
+    ["chi2", 60],
+]
 
 #1. Prepare features
 # fe = FeatureExtract("twitter")
@@ -139,4 +186,9 @@ source="twitter"
 # dimensionReduction(UX, Uy, "twitter")
 
 #2. kFold for Parallel
-evaluate("features_chi2","twitter")
+
+for source in SOURCES:
+    for fr in FEATURE_REDUCTIONS:
+        for classifier in CLASSIFIERS:
+            age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
+            evaluate(age_data, gen_data, both_data, classifier)
