@@ -21,7 +21,7 @@ class POSFeature:
         self.postCleaner = PostCleaner()
 
     def populateMappingDictionary(self):
-        print("populating map dictionary...")
+        # print("populating map dictionary...")
         with open("mapping.txt", "r") as file_object:
             for line in file_object:
                 splitline = line.split()
@@ -55,7 +55,7 @@ class POSFeature:
 
     def getCombinedPOSTag(self, post):
 
-        print("combining pos...[",post.id,"]")
+        # print("combining pos...[",post.id,"]")
         #assumptions: engPOS and filPOS are strings that contains POS tags separated by -
         #step 1: split tweets/posts into sentences and mapped fpos to epos
 
@@ -112,7 +112,7 @@ class POSFeature:
                 if(len(engTags) != len(filTags)):
                     for i in range(startIndex, wordCount + startIndex):
                         finalPOSTags.append(engTags[i])
-                    print("not same length...............................[",wordCount,"] ", sentence)
+                    # print("not same length...............................[",wordCount,"] ", sentence)
                     #time.sleep(5.5)
                 else:
                     for i in range(startIndex, wordCount + startIndex):

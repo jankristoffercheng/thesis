@@ -17,7 +17,7 @@ class LinkWrap(TransformerMixin):
     def fit(self, X, *args, **kwargs):
         links = []
         for index, row in X.iteritems():
-            text = DataCleaner().clean_data(row)
+            text = DataCleaner().clean_email(row)
             links.append(Links().get_list_keywords(text))
         dtm  = self.vectorizer.fit_transform(links)
         self.tfidf_transformer.fit(dtm)
@@ -26,12 +26,12 @@ class LinkWrap(TransformerMixin):
 
     def transform(self, X, y=None, **transform_params):
         links = []
+        # print(links)
         for index, row in X.iteritems():
-            text = DataCleaner().clean_data(row)
+            text = DataCleaner().clean_email(row)
             links.append(Links().get_list_keywords(text))
         dtm  = self.vectorizer.transform(links)
         data=self.tfidf_transformer.transform(dtm)
-        print(type(data))
         df = pd.SparseDataFrame(data=[pd.SparseSeries(data[i].toarray().ravel())
                                        for i in np.arange(data.shape[0])],
                                  columns=["Lnk."+freq for freq in self.vectorizer.get_feature_names()])

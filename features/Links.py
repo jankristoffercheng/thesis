@@ -11,26 +11,35 @@ class Links:
     def get_title(self, link):
         page = requests.get(link)
         soup = BeautifulSoup(page.content, 'html.parser')
-        title = soup.title.string
-        if 'Twitter' not in title:
-            return title
-        return ''
+        try:
+            title = soup.title.string
+        # print(title)
+            if 'Twitter' not in title:
+                # print("here")
+                return title
+            return ' '
+        except:
+            return ' '
 
     def get_links(self,text):
-
         text = self.email_cleaner.sub('', text, count=0)
+        # print(text)
         links = self.link_cleaner.findall(text)
+        # print(text, links)
         return links
 
     def get_keywords(self, link):
         page = requests.get(link)
         soup = BeautifulSoup(page.content, 'html.parser')
-        return soup.findAll(name='meta', attrs={'name':'keywords'})[0]['content'].split(", ")
+        try:
+            return soup.findAll(name='meta', attrs={'name':'keywords'})[0]['content'].split(", ")
+        except:
+            return []
 
     def get_list_keywords(self, text):
         keywords = []
         links = self.get_links(text)
         for link in links:
-            keywords+=self.get_keywords(link)+self.get_title(text).split()
+            keywords+=self.get_keywords(link)+self.get_title(link).split()
 
         return " ".join(keywords)

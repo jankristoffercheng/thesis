@@ -104,12 +104,17 @@ class FeatureExtract:
 
 
     def fit_transform(self, X):
+        print("Extracting POS")
         posFeatures = self.posSeqPipeline.fit_transform(X)
+        print("Extracting time")
         timeFeatures = self.timePipeline.fit_transform(X)
+        print("Extracting word")
         wordFeatures = self.wordPipeline.fit_transform(X)
+        print("Extracting character")
         characterFeatures = self.characterPipeline.fit_transform(X)
+        print("Extracting structure")
         structureFeatures = self.structurePipeline.fit_transform(X)
-        linkFeatures = self.linkPipeline.fit_transform(X)
+        print("Extracting socLin")
         socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), self.socLinEmojiPipeline.fit_transform(X),
                                     self.socLinFunctionPipeline.fit_transform(X)], axis=1)
         data = X['Text'].apply(self.clean)
@@ -117,24 +122,35 @@ class FeatureExtract:
         freqData = pd.DataFrame(data=freq.todense(),
                                 columns=["Frq." + freq for freq in self.tfidf.getFeatureNames()])
 
-        return pd.concat([posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, linkFeatures, socLinFeatures], axis=1)
+        # print("Extracting link")
+        # linkFeatures = self.linkPipeline.fit_transform(X)
+        return pd.concat([posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, socLinFeatures], axis=1)
+        # return linkFeatures
 
     def transform(self, X):
+        print("Extracting POS")
         posFeatures = self.posSeqPipeline.fit_transform(X)
+        print("Extracting time")
         timeFeatures = self.timePipeline.transform(X)
+        print("Extracting word")
         wordFeatures = self.wordPipeline.transform(X)
+        print("Extracting character")
         characterFeatures = self.characterPipeline.transform(X)
+        print("Extracting structure")
         structureFeatures = self.structurePipeline.transform(X)
-        linkFeatures = self.linkPipeline.fit_transform(X)
+        print("Extracting socLin")
         socLinFeatures = pd.concat([self.socLinContextPipeline.transform(X), self.socLinEmojiPipeline.transform(X),
                                     self.socLinFunctionPipeline.transform(X)], axis=1)
+        print("Extracting tfidf")
         data = X['Text'].apply(self.clean)
         freq = self.tfidf.get_testing_TFIDF(data)
         freqData = pd.DataFrame(data=freq.todense(),
                                 columns=["Frq." + freq for freq in self.tfidf.getFeatureNames()])
 
+        # print("Extracting link")
+        # linkFeatures = self.linkPipeline.fit_transform(X)
         return pd.concat(
-            [posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, linkFeatures, socLinFeatures], axis=1)
+            [posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, socLinFeatures], axis=1)
 
     # def get_tfidf(self):
 

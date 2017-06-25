@@ -16,8 +16,8 @@ class DOM:
     def getData(self, conn):
         cursor = conn.cursor()
 
-        # sql = "SELECT P.Id, P.User, P.Text, hour(P.Time) as Time, P.CmbPOS, U.Age AS Age, U.Gender, U.Batch  FROM post P, user U WHERE P.User = U.Id"
-        sql = "select post.User, post.Text, hour(post.Time) as Time, post.CmbPOS, user.Batch, user.Age, user.Gender from post, user where post.User = user.Id  and (select count(*) from post as f where f.User = post.User and f.Time >= post.Time) <=3;"
+        sql = "SELECT P.Id, P.User, P.Text, hour(P.Time) as Time, P.CmbPOS, U.Age AS Age, U.Gender, U.Batch  FROM post P, user U WHERE P.User = U.Id"
+        # sql = "select post.User, post.Text, hour(post.Time) as Time, post.CmbPOS, user.Batch, user.Age, user.Gender from post, user where post.User = user.Id  and (select count(*) from post as f where f.User = post.User and f.Time >= post.Time) <=1;"
 
         cursor.execute(sql)
         rows = cursor.fetchall()

@@ -102,33 +102,33 @@ def get_Data_from_CSV(source, fs, param=None):
 def evaluate(age_data, gen_data, both_data, model):
     age_model = RootModel(data=age_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    print("Parallel Model, Age, Train: " + train_results)
+    print("Root Model, Age, Results: " + test_results)
 
     gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    print("Stacked Model, Gender, Train: " + train_results)
+    print("Stacked Model, Gender, Results: " + test_results)
 
     gen_model = RootModel(data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    print("Parallel Model, Gender, Train: " + train_results)
+    print("Parallel Model, Gender, Results: " + test_results)
 
     age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    print("Stacked Model, Age, Train: " + train_results)
+    print("Stacked Model, Age, Results: " + test_results)
 
     both_model = RootModel(data=both_data, type='Gender', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
-    print(train_results)
-    print(test_results)
+    print("Combined Model, Gender, Train: " + train_results)
+    print("Combined Model, Gender, Results: " + test_results)
 
     both_model = RootModel(data=both_data, type='Age', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
-    print(train_results)
-    # print(test_results)
+    print("Combined Model, Age, Train: " + train_results)
+    print("Combined Model, Age, Results: " + test_results)
 
 
 
@@ -175,20 +175,21 @@ FEATURE_REDUCTIONS = [
 ]
 
 #1. Prepare features
-# fe = FeatureExtract("twitter")
-# data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
-# data = data.iloc[:,7:].groupby(data['User']).mean()
-# maxmin = MinMaxScaler()
-# data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
-# data.to_csv('data/'+source+'/raw/features_fin.csv')
+fe = FeatureExtract("twitter")
+data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
+data = data.iloc[:,7:].groupby(data['User']).mean()
+maxmin = MinMaxScaler()
+data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
+data.to_csv('data/'+source+'/raw/features_fin.csv')
 
 #3. Dimension Reduction
 # dimensionReduction(UX, Uy, "twitter")
 
 #2. kFold for Parallel
 
-for source in SOURCES:
-    for fr in FEATURE_REDUCTIONS:
-        for classifier in CLASSIFIERS:
-            age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
-            evaluate(age_data, gen_data, both_data, classifier)
+# for source in SOURCES:
+#     for fr in FEATURE_REDUCTIONS:
+#         for classifier in CLASSIFIERS:
+#             age_data, gen_data, both_data = get_Data_from_CSV(source, fr[0], fr[1])
+#             evaluate(age_data, gen_data, both_data, classifier)
+#             print(source + " " + fr + " " + classifier + ": ")

@@ -20,7 +20,7 @@ class EmojisEmoticons:
             else:
                 emojiList.append("")
 
-        print("emoji post:",emojiList)
+        # print("emoji post:",emojiList)
         return self.tfidf.get_training_TFIDF(emojiList)
 
     def getLabels(self):

@@ -27,7 +27,7 @@ class StructureWrap(TransformerMixin):
     def transform(self, X, y=None, **transform_params):
         result = pd.DataFrame(columns=['Str.'+item for item in columnList], dtype='float')
         for index, row in X.iteritems():
-            print(row)
+            # print(row)
             row = DataCleaner().clean_data(row)
             data = []
             data.append(self.feature.getNSentences(row))
