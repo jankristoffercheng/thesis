@@ -1,3 +1,5 @@
+import nltk
+
 from controller.Controller import Controller
 
 import unicodedata
@@ -12,6 +14,7 @@ sample = postCleaner.normalizeUnicode(sample)
 sample = postCleaner.changeForeignToText(sample)
 sample = postCleaner.changeLinkToText(sample)
 print(sample)
+nltk.download()
 
 # conn = Connection().getConnection()
 
