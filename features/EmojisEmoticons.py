@@ -26,7 +26,7 @@ class EmojisEmoticons:
 
         # print("emoji post:",emojiList)
         dtm  = self.vectorizer.fit_transform(emojiList)
-        return self.tfidf_transformer.fit(dtm)
+        return self.tfidf_transformer.fit_transform(dtm)
 
     def getLabels(self):
         return self.vectorizer.get_feature_names()
