@@ -62,12 +62,14 @@ DOC_FREQS = [ # min = 1%, 5%, 10%; max = 90%, 80%, 70%
 	[0.01, 0.70],
 	[0.01, 0.80],
 	[0.01, 0.90],
-
-	# [0.05, 0.80],
-	# [0.05, 0.70],
-	# [0.10, 0.90],
-	# [0.10, 0.80],
-	# [0.10, 0.70],
+	[0.10, 0.70],
+	[0.10, 0.80],
+	[0.10, 0.90],
+	[0.05, 0.70],
+	[0.05, 0.80],
+    [0.1, 0.99],
+    [0.05, 0.99],
+    [0.01, 0.99]
 ]
 
 #order should be according to how the metrics are returned from evaluateKFold method
@@ -78,39 +80,39 @@ def clean(x):
 
 def dimensionReduction(X ,y, source, mindf, maxdf, data=None):
     feature=Feature(X, y, source, data)
-    for freq in DOC_FREQS:
-        mindf = str(freq[0])
-        maxdf = str(freq[1])
-        for i in range(10, 61, 10):
-            gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/chi2/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/chi2/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/chi2/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+    # for freq in DOC_FREQS:
+    mindf = str(mindf)
+    maxdf = str(maxdf)
+    for i in range(10, 61, 10):
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/chi2/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/chi2/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(chi2, percentile=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/chi2/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
-        for i in range(100,1001,100):
-            gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/svd/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/svd/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/svd/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+    for i in range(100,1001,100):
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/svd/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/svd/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=TruncatedSVD(n_components=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/svd/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
-        for i in range(10,61,10):
-            gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Gender')
-            gen_data.to_csv('data/'+source+'/mi/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Age')
-            gen_data.to_csv('data/'+source+'/mi/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
-            gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Both')
-            gen_data.to_csv('data/'+source+'/mi/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+    for i in range(10,61,10):
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Gender')
+        gen_data.to_csv('data/'+source+'/mi/gender_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Age')
+        gen_data.to_csv('data/'+source+'/mi/age_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
+        gen_data = feature.getFeatures(selection=SelectPercentile(score_func=mutual_info_classif, percentile=i), mode='Both')
+        gen_data.to_csv('data/'+source+'/mi/both_'+str(i)+'_'+mindf+'-'+maxdf+'.csv')
 
-        gen_data = feature.useLasso(mode='Gender')
-        gen_data.to_csv('data/'+source+'/lasso/gender_'+mindf+'-'+maxdf+'.csv')
-        gen_data = feature.useLasso(mode='Age')
-        gen_data.to_csv('data/'+source+'/lasso/age_'+mindf+'-'+maxdf+'.csv')
-        gen_data = feature.useLasso(mode='Both')
-        gen_data.to_csv('data/'+source+'/lasso/both_'+mindf+'-'+maxdf+'.csv')
+    gen_data = feature.useLasso(mode='Gender')
+    gen_data.to_csv('data/'+source+'/lasso/gender_'+mindf+'-'+maxdf+'.csv')
+    gen_data = feature.useLasso(mode='Age')
+    gen_data.to_csv('data/'+source+'/lasso/age_'+mindf+'-'+maxdf+'.csv')
+    gen_data = feature.useLasso(mode='Both')
+    gen_data.to_csv('data/'+source+'/lasso/both_'+mindf+'-'+maxdf+'.csv')
 
 
 
@@ -190,37 +192,39 @@ def writeToExcel(book, sheet, features):
                     row += 1
 
 
+<<<<<<< HEAD
 X, y = DOM().getFBData()
 UX, Uy = DOM().getFBUserData()
 source="facebook"
+=======
+X, y = DOM().getTwitterData()
+source="twitter"
+>>>>>>> origin/master
 
 
 #1. Prepare features
 
-#<<<<<<< HEAD
+<<<<<<< HEAD
 # for freq in DOC_FREQS:
-#fe = FeatureExtract(source)
-#data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
-#data = data.iloc[:,7:].groupby(data['User']).mean()
-#maxmin = MinMaxScaler()
-#data.to_csv('data/'+source+'/raw/features_init_all.csv')
-#data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
-#data.to_csv('data/'+source+'/raw/features_fin_all.csv')
-
-'''
-for freq in DOC_FREQS:
-    fe = FeatureExtract(source, freq[0], freq[1])
-    data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
-    data = data.iloc[:,7:].groupby(data['User']).mean()
-    maxmin = MinMaxScaler()
-    data.to_csv('data/'+source+'/raw/features_init_'+str(freq[0])+'-'+str(freq[1])+'.csv')
-    data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
-    data.to_csv('data/'+source+'/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv')
-'''
-
+#     fe = FeatureExtract(source, freq[0], freq[1])
+#     data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
+#     data = data.iloc[:,7:].groupby(data['User']).mean()
+#     maxmin = MinMaxScaler()
+#     data.to_csv('data/'+source+'/raw/features_init_'+str(freq[0])+'-'+str(freq[1])+'.csv')
+#     data=pd.DataFrame(data=maxmin.fit_transform(data), columns=data.columns)
+#     data.to_csv('data/'+source+'/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv')
 
 #3. Dimension Reduction
+<<<<<<< HEAD
 #dimensionReduction(UX, Uy, source, 0.01, 0.7)
+=======
+
+
+for freq in DOC_FREQS:
+    UX, Uy = DOM().getTwitterUserData()
+    features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=0)
+    dimensionReduction(UX, Uy, "twitter", freq[0], freq[1], features)
+>>>>>>> origin/master
 
 #2. kFold for Parallel
 
@@ -231,6 +235,7 @@ i = 0
 for classifier in CLASSIFIERS:
     feature_results = {}
     for fr in FEATURE_REDUCTIONS:
+<<<<<<< HEAD
         doc_freq_results = {}
         for freq in DOC_FREQS:
             if (classifier == MultinomialNB and fr[0] != 'svd' or classifier != MultinomialNB):
@@ -242,6 +247,13 @@ for classifier in CLASSIFIERS:
     sheet = book.add_sheet(CLASSIFIER_NAMES[i], cell_overwrite_ok=True)
     writeToExcel(book, sheet, feature_results)
     i += 1
+=======
+        for freq in DOC_FREQS:
+            if(classifier is not MultinomialNB and fr[0] != "svd"):
+
+                age_data, gen_data, both_data = get_Data_from_CSV(source, freq[0], freq[1], fr[0], fr[1])
+                feature_results[fr[0]+"_"+fr[1]] = evaluate(age_data, gen_data, both_data, classifier)
+>>>>>>> origin/master
 
 book.save('data/'+source+"/"+source+".xls")
 
