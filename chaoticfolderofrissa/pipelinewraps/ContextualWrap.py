@@ -13,14 +13,16 @@ class ContextualWrap(TransformerMixin):
 
     def __init__(self, target=None):
         self.tfidf_transformer = TfidfTransformer()
-        self.vectorizer = CountVectorizer()
+        self.vectorizer = CountVectorizer(stop_words='english')
 
     def fit(self, X, *args, **kwargs):
         data = []
         for index, row in X.iteritems():
             text = DataCleaner().clean_data(row)
             data.append(Context().process(text))
+
         dtm  = self.vectorizer.fit_transform(data)
+
         self.tfidf_transformer.fit(dtm)
 
         return self

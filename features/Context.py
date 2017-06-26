@@ -8,7 +8,7 @@ class Context:
         s = s.lower()
         s = s.translate({ord(c): " " for c in string.punctuation})
         words = s.split()
-        print(words)
+        # print(words)
         next_words = []
         for x in range(len(words)):
             if words[x] == "my" and x + 1 < len(words):

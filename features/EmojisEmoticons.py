@@ -1,3 +1,5 @@
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
+
 from features.TFIDF import TFIDF
 from utility.PostCleaner import PostCleaner
 
@@ -5,7 +7,9 @@ from utility.PostCleaner import PostCleaner
 class EmojisEmoticons:
 
     def __init__(self):
-        self.tfidf = TFIDF()
+        self.tfidf_transformer = TfidfTransformer()
+        self.vectorizer = CountVectorizer(stop_words='english')
+        # self.tfidf = TFIDF(mindf, maxdf)
 
     def getEmojiTFIDF(self, data):
         # postDAO = PostsDAO()
@@ -21,10 +25,11 @@ class EmojisEmoticons:
                 emojiList.append("")
 
         # print("emoji post:",emojiList)
-        return self.tfidf.get_training_TFIDF(emojiList)
+        dtm  = self.vectorizer.fit_transform(emojiList)
+        return self.tfidf_transformer.fit(dtm)
 
     def getLabels(self):
-        return self.tfidf.getFeatureNames()
+        return self.vectorizer.get_feature_names()
 
 # ee = EmojisEmoticons()
 # print(ee.getEmojiTFIDF())

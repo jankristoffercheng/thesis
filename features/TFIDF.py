@@ -2,10 +2,9 @@ from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
 
 class TFIDF:
-    def __init__(self):
+    def __init__(self, mindf, maxdf):
         self.tfidf_transformer = TfidfTransformer()
-        # , max_df = 0.1, min_df = 0.01
-        self.vectorizer = CountVectorizer(stop_words='english')
+        self.vectorizer = CountVectorizer(stop_words='english', max_df=maxdf, min_df=mindf)
 
     def getFeatureNames(self):
         return ["Frq." + freq for freq in self.vectorizer.get_feature_names()]

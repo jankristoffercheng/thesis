@@ -38,7 +38,7 @@ soc = {'label':'Soc.','categories':("swear",
             "filler")}
 
 class FeatureExtract:
-    def __init__(self, source):
+    def __init__(self, source, mindf, maxdf ):
         self.source=source
         self.posSeqPipeline = Pipeline([
             ('get_top', POSSeqWrap())
@@ -79,7 +79,7 @@ class FeatureExtract:
             ('function', FunctionWrap())
         ])
 
-        self.tfidf = TFIDF()
+        self.tfidf = TFIDF(mindf, maxdf)
 
         # print(X['Text'])
 
@@ -115,7 +115,7 @@ class FeatureExtract:
         print("Extracting structure")
         structureFeatures = self.structurePipeline.fit_transform(X)
         print("Extracting socLin")
-        socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), #oself.socLinEmojiPipeline.fit_transform(X),
+        socLinFeatures = pd.concat([self.socLinContextPipeline.fit_transform(X), self.socLinEmojiPipeline.fit_transform(X),
                                     self.socLinFunctionPipeline.fit_transform(X)], axis=1)
         data = X['Text'].apply(self.clean)
         freq = self.tfidf.get_training_TFIDF(data)
@@ -125,7 +125,7 @@ class FeatureExtract:
         # print("Extracting link")
         # linkFeatures = self.linkPipeline.fit_transform(X)
         return pd.concat([posFeatures, freqData, timeFeatures, wordFeatures, characterFeatures, structureFeatures, socLinFeatures], axis=1)
-        # return linkFeatures
+        # return socLinFeatures
 
     def transform(self, X):
         print("Extracting POS")

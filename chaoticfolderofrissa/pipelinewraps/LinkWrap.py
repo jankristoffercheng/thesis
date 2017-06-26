@@ -12,7 +12,7 @@ class LinkWrap(TransformerMixin):
 
     def __init__(self, target=None):
         self.tfidf_transformer = TfidfTransformer()
-        self.vectorizer = CountVectorizer()
+        self.vectorizer = CountVectorizer(stop_words='english')
 
     def fit(self, X, *args, **kwargs):
         links = []
