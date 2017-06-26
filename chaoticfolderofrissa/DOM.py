@@ -2,15 +2,15 @@ import pymysql
 import pandas as pd
 class DOM:
     def getConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterdb', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='root', db='twitterdb', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getTwitterConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterremerged', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='root', db='twitterremerged', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getFacebookConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='1234', db='facebookdb', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='root', db='facebookdb', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getData(self, conn):
