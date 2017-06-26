@@ -2,15 +2,15 @@ import pymysql
 import pandas as pd
 class DOM:
     def getConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='root', db='twitterdb', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterdb', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getTwitterConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='root', db='twitterremerged', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='1234', db='twitterremerged', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getFacebookConnection(self):
-        return pymysql.connect(host='localhost', user='root', password='root', db='facebookdb', charset='utf8mb4',
+        return pymysql.connect(host='localhost', user='root', password='1234', db='facebookdb', charset='utf8mb4',
                                cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
     def getData(self, conn):
@@ -72,8 +72,16 @@ class DOM:
     def getMergedData(self):
         tdata = self.getData(self.getTwitterConnection())
         fdata = self.getData(self.getFacebookConnection())
-        X = pd.DataFrame(tdata['Features']+fdata['Features'], columns=['User', 'Text', 'PostTime', 'POS', 'Batch'])
-        y=pd.DataFrame(tdata['Results']+fdata['Results'], columns=['Age', 'Gender'])
+        X = pd.DataFrame(fdata['Features']+tdata['Features'], columns=['User', 'Text', 'PostTime', 'POS', 'Batch'])
+        y=pd.DataFrame(fdata['Results']+tdata['Results'], columns=['Age', 'Gender'])
+
+        return X,y
+
+    def getMergedUsersData(self):
+        tdata = self.getUserData(self.getTwitterConnection())
+        fdata = self.getUserData(self.getFacebookConnection())
+        X = pd.DataFrame(fdata['Features']+tdata['Features'], columns=['User', 'Batch'])
+        y=pd.DataFrame(fdata['Results']+tdata['Results'], columns=['Age', 'Gender'])
 
         return X,y
 

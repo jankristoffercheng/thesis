@@ -57,10 +57,10 @@ FEATURE_REDUCTIONS = [
     ["chi2", 60],
 ]
 DOC_FREQS = [ # min = 1%, 5%, 10%; max = 90%, 80%, 70%
-	# [0.05, 0.90],
-	# [0.01, 0.70],
-	# [0.01, 0.80],
-	# [0.01, 0.90],
+	[0.05, 0.90],
+	[0.01, 0.70],
+	[0.01, 0.80],
+	[0.01, 0.90],
 	[0.10, 0.70],
 	[0.10, 0.80],
 	[0.10, 0.90],
@@ -203,13 +203,13 @@ def writeToExcel(book, sheet, features):
         col = 0
 
 
-X, y = DOM().getTwitterData()
-source="twitter"
+X, y = DOM().getMergedData()
+source="merged"
 
 
 #1. Prepare features
 
-<<<<<<< HEAD
+
 # for freq in DOC_FREQS:
 #     fe = FeatureExtract(source, freq[0], freq[1])
 #     data = pd.concat([X, fe.get_liwc(), fe.fit_transform(X)],axis=1)
@@ -223,29 +223,31 @@ source="twitter"
 
 
 for freq in DOC_FREQS:
-    UX, Uy = DOM().getTwitterUserData()
-    features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=0)
-    dimensionReduction(UX, Uy, "twitter", freq[0], freq[1], features)
+    UX, Uy = DOM().getMergedUsersData()
+    features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=False)
+    features = features.drop(features.columns[0], axis=1)
+
+    dimensionReduction(UX, Uy, source, freq[0], freq[1], features)
 
 #2. kFold for Parallel
 
-class_results = {}
-book = xlwt.Workbook(encoding="utf-8")
-for classifier in CLASSIFIERS:
-    feature_results = {}
-    for fr in FEATURE_REDUCTIONS:
-        for freq in DOC_FREQS:
-            if(classifier is not MultinomialNB and fr[0] != "svd"):
-
-                age_data, gen_data, both_data = get_Data_from_CSV(source, freq[0], freq[1], fr[0], fr[1])
-                feature_results[fr[0]+"_"+fr[1]] = evaluate(age_data, gen_data, both_data, classifier)
-
-#                   print(source, " ", fr, " ", classifier, ": ")
-
-    sheet = book.add_sheet(classifier)
-    writeToExcel(book, sheet,feature_results)
-
-book.save("twitter.xls")
+# class_results = {}
+# book = xlwt.Workbook(encoding="utf-8")
+# for classifier in CLASSIFIERS:
+#     feature_results = {}
+#     for fr in FEATURE_REDUCTIONS:
+#         for freq in DOC_FREQS:
+#             if(classifier is not MultinomialNB and fr[0] != "svd"):
+#
+#                 age_data, gen_data, both_data = get_Data_from_CSV(source, freq[0], freq[1], fr[0], fr[1])
+#                 feature_results[fr[0]+"_"+fr[1]] = evaluate(age_data, gen_data, both_data, classifier)
+#
+# #                   print(source, " ", fr, " ", classifier, ": ")
+#
+#     sheet = book.add_sheet(classifier)
+#     writeToExcel(book, sheet,feature_results)
+#
+# book.save("twitter.xls")
 
 #
 # X[['Text']].to_csv("twitterdata.csv")
@@ -259,3 +261,6 @@ book.save("twitter.xls")
 
 
 # pd.concat([pd.read_csv('data/fb/raw/features_fin.csv', index_col=0),pd.read_csv('data/twitter/raw/features_fin.csv', index_col=0)],axis=0).to_csv('data/merged/raw/features_fin.csv')
+
+# for freq in DOC_FREQS:
+#     pd.concat([pd.read_csv('data/fb/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv', index_col=0, encoding = "ISO-8859-1"),pd.read_csv('data/twitter/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv', encoding = "ISO-8859-1", index_col=0)],axis=0).to_csv('data/merged/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv')
