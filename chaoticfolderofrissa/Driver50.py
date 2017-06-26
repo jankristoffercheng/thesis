@@ -20,6 +20,7 @@ from utility.DataCleaner import DataCleaner
 import xlwt
 
 
+CLASSIFIER_NAMES = ['SVC', 'MultinomialNB', 'RidgeClassifier', 'DecisionTree']
 CLASSIFIERS = [
 	svm.SVC,
 	MultinomialNB,
@@ -113,6 +114,8 @@ def dimensionReduction(X ,y, source, mindf, maxdf, data=None):
     gen_data = feature.useLasso(mode='Both')
     gen_data.to_csv('data/'+source+'/lasso/both_'+mindf+'-'+maxdf+'.csv')
 
+
+
 def getSpecificFeatures(data, features):
     filter_col = [col for col in list(data) if (("." not in col) or (col.startswith(tuple(features))))]
     return data[filter_col]
@@ -121,6 +124,7 @@ def get_Data_from_CSV(source, mindf, maxdf, fs, param=None):
     param = str(param)
     mindf = str(mindf)
     maxdf = str(maxdf)
+
     if(fs=="lasso"):
         age_data = pd.read_csv("data/" + source + "/" + fs + "/age_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
         gen_data = pd.read_csv("data/" + source + "/" + fs + "/gender_"+mindf+"-"+maxdf+".csv", index_col=0, encoding='latin1')
@@ -142,65 +146,50 @@ def evaluate(age_data, gen_data, both_data, model):
     result_collection['Parallel_Age_Train'] = train_results
     result_collection['Parallel_Age_Test'] = test_results
 
-    #print("Parallel Model, Age, Train: ", train_results)
-    #print("Parallel Model, Age, Results: ", test_results)
-
     gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
 
     result_collection['Stacked_Gender_Train'] = train_results
     result_collection['Stacked_Gender_Test'] = test_results
-    #print("Stacked Model, Gender, Train: ", train_results)
-    #print("Stacked Model, Gender, Results: ", test_results)
 
     gen_model = RootModel(data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
 
     result_collection['Parallel_Gender_Train'] = train_results
     result_collection['Parallel_Gender_Test'] = test_results
-    #print("Parallel Model, Gender, Train: ", train_results)
-    #print("Parallel Model, Gender, Results: ", test_results)
 
     age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
 
     result_collection['Stacked_Age_Train'] = train_results
     result_collection['Stacked_Age_Test'] = test_results
-    #print("Stacked Model, Age, Train: ", train_results)
-    #print("Stacked Model, Age, Results: ", test_results)
 
     both_model = RootModel(data=both_data, type='Gender', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
 
     result_collection['Combined_Gender_Train'] = train_results
     result_collection['Combined_Gender_Test'] = test_results
-    #print("Combined Model, Gender, Train: ", train_results)
-    #print("Combined Model, Gender, Results: ", test_results)
 
     both_model = RootModel(data=both_data, type='Age', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
 
     result_collection['Combined_Age_Train'] = train_results
     result_collection['Combined_Age_Test'] = test_results
-    #print("Combined Model, Age, Train: ", train_results)
-    #print("Combined Model, Age, Results: ", test_results)
 
     return result_collection
 
 def writeToExcel(book, sheet, features):
-    col = 0
     row = 0
-    for featureName, models in features.items():
-        sheet.write(row, col, featureName)
-        col += 1
-        for modelName, modelMetrics in models.items():
-            sheet.write(row, col, modelName)
-            for i in range(len(METRICS)):
-                sheet.write(row, col + 1, METRICS[i])
-                sheet.write(row, col + 2, modelMetrics[i])
-                row += 1
-        row += 1
-        col = 0
+    for featureName, docFreqs in features.items():
+        sheet.write(row, 0, featureName)
+        for docFreqVal, models in docFreqs.items():
+            sheet.write(row, 1, docFreqVal)
+            for modelName, modelMetrics in models.items():
+                sheet.write(row, 2, modelName)
+                for i in range(len(METRICS)):
+                    sheet.write(row, 3, METRICS[i])
+                    sheet.write(row, 4, modelMetrics[i])
+                    row += 1
 
 
 X, y = DOM().getMergedData()
@@ -220,7 +209,7 @@ source="merged"
 #     data.to_csv('data/'+source+'/raw/features_fin_'+str(freq[0])+'-'+str(freq[1])+'.csv')
 
 #3. Dimension Reduction
-
+#dimensionReduction(UX, Uy, source, 0.01, 0.7)
 
 for freq in DOC_FREQS:
     UX, Uy = DOM().getMergedUsersData()
@@ -229,26 +218,28 @@ for freq in DOC_FREQS:
 
     dimensionReduction(UX, Uy, source, freq[0], freq[1], features)
 
+
 #2. kFold for Parallel
 
-# class_results = {}
-# book = xlwt.Workbook(encoding="utf-8")
-# for classifier in CLASSIFIERS:
-#     feature_results = {}
-#     for fr in FEATURE_REDUCTIONS:
-#         for freq in DOC_FREQS:
-#             if(classifier is not MultinomialNB and fr[0] != "svd"):
-#
-#                 age_data, gen_data, both_data = get_Data_from_CSV(source, freq[0], freq[1], fr[0], fr[1])
-#                 feature_results[fr[0]+"_"+fr[1]] = evaluate(age_data, gen_data, both_data, classifier)
-#
-# #                   print(source, " ", fr, " ", classifier, ": ")
-#
-#     sheet = book.add_sheet(classifier)
-#     writeToExcel(book, sheet,feature_results)
-#
-# book.save("twitter.xls")
 
+class_results = {}
+book = xlwt.Workbook(encoding="utf-8")
+i = 0
+for classifier in CLASSIFIERS:
+    feature_results = {}
+    for fr in FEATURE_REDUCTIONS:
+        doc_freq_results = {}
+        for freq in DOC_FREQS:
+            if (classifier == MultinomialNB and fr[0] != 'svd' or classifier != MultinomialNB):
+                age_data, gen_data, both_data = get_Data_from_CSV(source, freq[0], freq[1], fr[0], fr[1])
+                doc_freq_results[str(freq[0]) + "_" + str(freq[1])] = evaluate(age_data, gen_data, both_data,
+                                                                               classifier)
+        feature_results[str(fr[0]) + "_" + str(fr[1])] = doc_freq_results
+
+    sheet = book.add_sheet(CLASSIFIER_NAMES[i], cell_overwrite_ok=True)
+    writeToExcel(book, sheet, feature_results)
+    i += 1
+book.save('data/'+source+"/"+source+".xls")
 #
 # X[['Text']].to_csv("twitterdata.csv")
 

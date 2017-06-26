@@ -65,19 +65,54 @@ class StackModel:
         return useres, trueres
 
     def evaluateKfold(self, train_predictions=None, test_predictions=None):
-        if(train_predictions is None or test_predictions is None):
+        if (train_predictions is None or test_predictions is None):
             train_predictions, test_predictions = self.getPredictions()
 
-        train_results = {'Post': [], 'User': []}
-        test_results = {'Post': [], 'User': []}
+        train_accuracy_results = {'Post': [], 'User': []}
+        test_accuracy_results = {'Post': [], 'User': []}
 
-        for i in range(0,10):
-            trainY = self.getTrainingy(i).reset_index(drop=True)
-            train_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
-            testY = self.getTestingy(i).reset_index(drop=True)
-            test_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
+        train_precision_results = {'Post': [], 'User': []}
+        test_precision_results = {'Post': [], 'User': []}
 
-        return train_results, test_results
+        train_recall_results = {'Post': [], 'User': []}
+        test_recall_results = {'Post': [], 'User': []}
+
+        train_kappa_results = {'Post': [], 'User': []}
+        test_kappa_results = {'Post': [], 'User': []}
+
+        train_fmeasure_results = {'Post': [], 'User': []}
+        test_fmeasure_results = {'Post': [], 'User': []}
+
+        for i in range(0, 10):
+            trainY = self.getTrainingy(i)
+            testY = self.getTestingy(i)
+
+            train_accuracy_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
+            test_accuracy_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
+
+            train_precision_results['User'].append(
+                metrics.precision_score(trainY, train_predictions[i], average='micro'))
+            test_precision_results['User'].append(metrics.precision_score(testY, test_predictions[i], average='micro'))
+
+            train_recall_results['User'].append(metrics.recall_score(trainY, train_predictions[i], average='micro'))
+            test_recall_results['User'].append(metrics.recall_score(testY, test_predictions[i], average='micro'))
+
+            train_kappa_results['User'].append(metrics.cohen_kappa_score(trainY, train_predictions[i]))
+            test_kappa_results['User'].append(metrics.cohen_kappa_score(testY, test_predictions[i]))
+
+            train_fmeasure_results['User'].append(metrics.f1_score(trainY, train_predictions[i], average='micro'))
+            test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i], average='micro'))
+
+        return [sum(train_accuracy_results['User']) / len(train_accuracy_results['User']),
+                sum(train_precision_results['User']) / len(train_precision_results['User']),
+                sum(train_recall_results['User']) / len(train_recall_results['User']),
+                sum(train_kappa_results['User']) / len(train_kappa_results['User']),
+                sum(train_fmeasure_results['User']) / len(train_fmeasure_results['User'])], [
+               sum(test_accuracy_results['User']) / len(test_accuracy_results['User']),
+               sum(test_precision_results['User']) / len(test_precision_results['User']),
+               sum(test_recall_results['User']) / len(test_recall_results['User']),
+               sum(test_kappa_results['User']) / len(test_kappa_results['User']),
+               sum(test_fmeasure_results['User']) / len(test_fmeasure_results['User'])]
 
     def getPredictions(self):
         train_predictions = []

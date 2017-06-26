@@ -100,16 +100,16 @@ class RootModel:
             test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i], average='micro'))
 
 
-        return [sum(train_accuracy_results)/len(train_accuracy_results),
-                sum(train_precision_results)/len(train_precision_results),
-                sum(train_recall_results)/len(train_recall_results),
-                sum(train_kappa_results)/len(train_kappa_results),
-                sum(train_fmeasure_results)/len(train_fmeasure_results)], [
-                sum(test_accuracy_results)/len(test_accuracy_results),
-                sum(test_precision_results)/len(test_precision_results),
-                sum(test_recall_results)/len(test_recall_results),
-                sum(test_kappa_results)/len(test_kappa_results),
-                sum(test_fmeasure_results)/len(test_fmeasure_results)]
+        return [sum(train_accuracy_results['User'])/len(train_accuracy_results['User']),
+                sum(train_precision_results['User'])/len(train_precision_results['User']),
+                sum(train_recall_results['User'])/len(train_recall_results['User']),
+                sum(train_kappa_results['User'])/len(train_kappa_results['User']),
+                sum(train_fmeasure_results['User'])/len(train_fmeasure_results['User'])], [
+                sum(test_accuracy_results['User'])/len(test_accuracy_results['User']),
+                sum(test_precision_results['User'])/len(test_precision_results['User']),
+                sum(test_recall_results['User'])/len(test_recall_results['User']),
+                sum(test_kappa_results['User'])/len(test_kappa_results['User']),
+                sum(test_fmeasure_results['User'])/len(test_fmeasure_results['User'])]
 
     def getPredictions(self):
         train_predictions = []
