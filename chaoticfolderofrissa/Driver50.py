@@ -189,7 +189,6 @@ def evaluate(age_data, gen_data, both_data, model):
 
 
 X, y = DOM().getTwitterData()
-UX, Uy = DOM().getTwitterUserData()
 source="twitter"
 
 
@@ -208,6 +207,7 @@ source="twitter"
 
 
 for freq in DOC_FREQS:
+    UX, Uy = DOM().getTwitterUserData()
     features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=0)
     dimensionReduction(UX, Uy, "twitter", freq[0], freq[1], features)
 

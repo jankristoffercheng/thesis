@@ -14,7 +14,7 @@ import numpy as np
 class Feature:
 
     def __init__(self, X, y, source, data=None):
-        self.X,self.y = X, y
+        self.X, self.y = X, y
         self.y['Gender'] = GenderWrap().fit_transform(self.y['Gender'])
         self.y['Age'] = AgeRangeWrap().fit_transform(self.y['Age'])
         if data is None:
