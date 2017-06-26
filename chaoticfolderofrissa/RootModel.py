@@ -99,7 +99,17 @@ class RootModel:
             train_fmeasure_results['User'].append(metrics.f1_score(trainY, train_predictions[i], average='micro'))
             test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i], average='micro'))
 
-        return [train_accuracy_results, train_precision_results, train_recall_results, train_kappa_results, train_fmeasure_results], [test_accuracy_results, test_precision_results, test_recall_results,  test_kappa_results, test_fmeasure_results]
+
+        return [sum(train_accuracy_results)/len(train_accuracy_results),
+                sum(train_precision_results)/len(train_precision_results),
+                sum(train_recall_results)/len(train_recall_results),
+                sum(train_kappa_results)/len(train_kappa_results),
+                sum(train_fmeasure_results)/len(train_fmeasure_results)], [
+                sum(test_accuracy_results)/len(test_accuracy_results),
+                sum(test_precision_results)/len(test_precision_results),
+                sum(test_recall_results)/len(test_recall_results),
+                sum(test_kappa_results)/len(test_kappa_results),
+                sum(test_fmeasure_results)/len(test_fmeasure_results)]
 
     def getPredictions(self):
         train_predictions = []
