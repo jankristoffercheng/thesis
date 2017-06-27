@@ -72,8 +72,7 @@ DOC_FREQS = [ # min = 1%, 5%, 10%; max = 90%, 80%, 70%
     [0.01, 0.99]
 ]
 
-#order should be according to how the metrics are returned from evaluateKFold method
-METRICS  = ['Accuracy', 'Precision', 'Recall', 'Kappa', 'F-measure']
+
 
 def clean(x):
     return  DataCleaner().clean_data(x)
@@ -143,57 +142,50 @@ def evaluate(age_data, gen_data, both_data, model):
     age_model = RootModel(data=age_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
 
-    result_collection['Parallel_Age_Train'] = train_results
     result_collection['Parallel_Age_Test'] = test_results
 
     gen_model = StackModel(root=age_model, data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
 
-    result_collection['Stacked_Gender_Train'] = train_results
     result_collection['Stacked_Gender_Test'] = test_results
 
     gen_model = RootModel(data=gen_data, type='Gender', modelType=model)
     train_results, test_results = gen_model.evaluateKfold()
 
-    result_collection['Parallel_Gender_Train'] = train_results
     result_collection['Parallel_Gender_Test'] = test_results
 
     age_model = StackModel(root=gen_model, data=gen_data, type='Age', modelType=model)
     train_results, test_results = age_model.evaluateKfold()
 
-    result_collection['Stacked_Age_Train'] = train_results
     result_collection['Stacked_Age_Test'] = test_results
 
     both_model = RootModel(data=both_data, type='Gender', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
 
-    result_collection['Combined_Gender_Train'] = train_results
     result_collection['Combined_Gender_Test'] = test_results
 
     both_model = RootModel(data=both_data, type='Age', modelType=model)
     train_results, test_results = both_model.evaluateKfold()
 
-    result_collection['Combined_Age_Train'] = train_results
     result_collection['Combined_Age_Test'] = test_results
 
     return result_collection
 
-def writeToExcel(book, sheet, features):
-    row = 0
+def writeToExcel(book, sheet, classifier, features, row):
+    sheet.write(row, 0, classifier)
     for featureName, docFreqs in features.items():
-        sheet.write(row, 0, featureName)
+        sheet.write(row, 1, featureName)
         for docFreqVal, models in docFreqs.items():
-            sheet.write(row, 1, docFreqVal)
+            sheet.write(row, 2, docFreqVal)
             for modelName, modelMetrics in models.items():
-                sheet.write(row, 2, modelName)
-                for i in range(len(METRICS)):
-                    sheet.write(row, 3, METRICS[i])
-                    sheet.write(row, 4, modelMetrics[i])
-                    row += 1
-
+                sheet.write(row, 3, modelName)
+                for i in range(len(modelMetrics)):
+                    sheet.write(row, 4+i, modelMetrics[i])
+                row += 1
+    return row
 
 X, y = DOM().getMergedData()
-source="merged"
+source="facebook"
 
 
 #1. Prepare features
@@ -211,20 +203,26 @@ source="merged"
 #3. Dimension Reduction
 #dimensionReduction(UX, Uy, source, 0.01, 0.7)
 
-for freq in DOC_FREQS:
-    UX, Uy = DOM().getMergedUsersData()
-    features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=False)
-    features = features.drop(features.columns[0], axis=1)
+#for freq in DOC_FREQS:
+#    UX, Uy = DOM().getMergedUsersData()
+#    features = pd.read_csv("data/"+source+"/raw/features_fin_"+str(freq[0])+"-"+str(freq[1])+".csv", encoding = "ISO-8859-1", index_col=False)
+#    features = features.drop(features.columns[0], axis=1)
 
-    dimensionReduction(UX, Uy, source, freq[0], freq[1], features)
+#    dimensionReduction(UX, Uy, source, freq[0], freq[1], features)
 
 
 #2. kFold for Parallel
 
-
+#Metrics order should be according to how the metrics are returned from evaluateKFold method
+SHEET_COLUMNS = ["Algorithm", "FReduction_Thrsh","Doc_Freq","Models", "Accuracy", "Precision", "Recall", "Kappa", "F-Measure"]
 class_results = {}
 book = xlwt.Workbook(encoding="utf-8")
+sheet = book.add_sheet("Results",cell_overwrite_ok=True)
+for i in range(len(SHEET_COLUMNS)):
+    sheet.write(0, i, SHEET_COLUMNS[i])
+
 i = 0
+row = 1
 for classifier in CLASSIFIERS:
     feature_results = {}
     for fr in FEATURE_REDUCTIONS:
@@ -236,8 +234,7 @@ for classifier in CLASSIFIERS:
                                                                                classifier)
         feature_results[str(fr[0]) + "_" + str(fr[1])] = doc_freq_results
 
-    sheet = book.add_sheet(CLASSIFIER_NAMES[i], cell_overwrite_ok=True)
-    writeToExcel(book, sheet, feature_results)
+    row = writeToExcel(book, sheet, CLASSIFIER_NAMES[i], feature_results, row)
     i += 1
 book.save('data/'+source+"/"+source+".xls")
 #
