@@ -172,15 +172,16 @@ def evaluate(age_data, gen_data, both_data, model):
     return result_collection
 
 def writeToExcel(book, sheet, classifier, features, row):
-    sheet.write(row, 0, classifier)
+
     for featureName, docFreqs in features.items():
-        sheet.write(row, 1, featureName)
         for docFreqVal, models in docFreqs.items():
-            sheet.write(row, 2, docFreqVal)
             for modelName, modelMetrics in models.items():
-                sheet.write(row, 3, modelName)
                 for i in range(len(modelMetrics)):
-                    sheet.write(row, 4+i, modelMetrics[i])
+                    sheet.write(row, 4 + i, modelMetrics[i])
+                sheet.write(row, 0, classifier)
+                sheet.write(row, 1, featureName)
+                sheet.write(row, 2, docFreqVal)
+                sheet.write(row, 3, modelName)
                 row += 1
     return row
 
