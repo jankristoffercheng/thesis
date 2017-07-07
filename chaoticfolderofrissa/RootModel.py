@@ -87,17 +87,17 @@ class RootModel:
             train_accuracy_results['User'].append(metrics.accuracy_score(trainY, train_predictions[i]))
             test_accuracy_results['User'].append(metrics.accuracy_score(testY, test_predictions[i]))
 
-            train_precision_results['User'].append(metrics.precision_score(trainY, train_predictions[i], average='micro'))
-            test_precision_results['User'].append(metrics.precision_score(testY, test_predictions[i], average='micro'))
+            train_precision_results['User'].append(metrics.precision_score(trainY, train_predictions[i], average='macro'))
+            test_precision_results['User'].append(metrics.precision_score(testY, test_predictions[i], average='macro'))
 
-            train_recall_results['User'].append(metrics.recall_score(trainY, train_predictions[i], average='micro'))
-            test_recall_results['User'].append(metrics.recall_score(testY, test_predictions[i], average='micro'))
+            train_recall_results['User'].append(metrics.recall_score(trainY, train_predictions[i], average='macro'))
+            test_recall_results['User'].append(metrics.recall_score(testY, test_predictions[i], average='macro'))
 
             train_kappa_results['User'].append(metrics.cohen_kappa_score(trainY, train_predictions[i]))
             test_kappa_results['User'].append(metrics.cohen_kappa_score(testY, test_predictions[i]))
 
-            train_fmeasure_results['User'].append(metrics.f1_score(trainY, train_predictions[i], average='micro'))
-            test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i], average='micro'))
+            train_fmeasure_results['User'].append(metrics.f1_score(trainY, train_predictions[i], average='macro'))
+            test_fmeasure_results['User'].append(metrics.f1_score(testY, test_predictions[i], average='macro'))
 
 
         return [sum(train_accuracy_results['User'])/len(train_accuracy_results['User']),
@@ -132,7 +132,7 @@ class RootModel:
         for i in range(0,10):
             print("train")
             if(modelType is svm.SVC):
-                model = modelType()
+                model = modelType(kernel='linear')
             elif(modelType is MultinomialNB):
                 model = modelType()
             elif(modelType is RidgeClassifier):

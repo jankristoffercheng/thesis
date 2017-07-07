@@ -20,12 +20,17 @@ from utility.DataCleaner import DataCleaner
 import xlwt
 
 
-CLASSIFIER_NAMES = ['SVC', 'MultinomialNB', 'RidgeClassifier', 'DecisionTree']
+CLASSIFIER_NAMES = [
+    'SVC'#,
+    # 'MultinomialNB',
+    # 'RidgeClassifier',
+    # 'DecisionTree'
+]
 CLASSIFIERS = [
 	svm.SVC,
-	MultinomialNB,
-    RidgeClassifier,
-    DecisionTreeClassifier
+    # MultinomialNB,
+    # RidgeClassifier,
+    # DecisionTreeClassifier
 ]
 SOURCES = [
     "twitter",
@@ -185,8 +190,8 @@ def writeToExcel(book, sheet, classifier, features, row):
                 row += 1
     return row
 
-X, y = DOM().getMergedData()
-source="facebook"
+X, y = DOM().getTwitterData()
+source="twitter"
 
 
 #1. Prepare features
