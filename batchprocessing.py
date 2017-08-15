@@ -104,19 +104,22 @@ normapi.normalize_File(NORMALIZE_IN)
 #copy output of normalized text as hpost input
 shutil.copy2(NORMALIZE_OUT, HPOST_IN)
 '''
-posts = getPosts()
-ids = posts['ids']
-texts = posts['texts']
-#updateEngPOS(ids, texts)
 
 
-writePostsToFile(texts, HPOST_IN)
 
-jvmPath = jpype.getDefaultJVMPath()
-jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
-rbpost = JPackage("rbpost").RBPOST
-rbpost.hPOST_File(HPOST_IN, '', '')
-posts = getPostsFromFile(HPOST_OUT)
-
-jpype.shutdownJVM()
-updatePosts(ids, posts)
+# posts = getPosts()
+# ids = posts['ids']
+# texts = posts['texts']
+# #updateEngPOS(ids, texts)
+#
+#
+# writePostsToFile(texts, HPOST_IN)
+#
+# jvmPath = jpype.getDefaultJVMPath()
+# jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
+# rbpost = JPackage("rbpost").RBPOST
+# rbpost.hPOST_File(HPOST_IN, '', '')
+# posts = getPostsFromFile(HPOST_OUT)
+#
+# jpype.shutdownJVM()
+# updatePosts(ids, posts)

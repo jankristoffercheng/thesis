@@ -1,6 +1,4 @@
-import numpy as np
-
-from connection.Connection import Connection
+from dao.Connection import Connection
 from features.POSFeature import POSFeature
 from model.Document import Document
 from model.Post import Post
@@ -69,57 +67,5 @@ class PostsDAO:
             cursor2.execute(sql)
             row = cursor.fetchone()
             print(id)
-
-    def getTrainingData(self):
-        conn = Connection().getConnection()
-        cursor = conn.cursor()
-        sql = 'SELECT P.nVerbs, P.nAdjectives, U.gender FROM posts P, users U WHERE P.user_id = U.id AND P.nVerbs != 0 AND P.nAdjectives != 0;'
-        cursor.execute(sql)
-        row = cursor.fetchone()
-        dimensions = []
-        classes = []
-        while row is not None:
-            dimension = [row['nVerbs'], row['nAdjectives']]
-            dimensions.append(dimension)
-            classes.append(row['gender'])
-            row = cursor.fetchone()
-        return {'Dimensions':dimensions, 'Classes': classes}
-
-    def getTrainingGenderPreferentialData(self):
-        conn = Connection().getConnection()
-        cursor = conn.cursor()
-        sql = 'SELECT P.text, U.gender FROM posts P, users U WHERE P.user_id = U.id;'
-        cursor.execute(sql)
-        row = cursor.fetchone()
-        dimensions = []
-        classes = []
-        while row is not None:
-            dimensions.append(row['text'])
-            classes.append(row['gender'])
-            row = cursor.fetchone()
-
-
-        return {'Dimensions':dimensions, 'Classes': classes}
-
-
-    def getTrainingPOSData(self):
-        conn = Connection().getConnection()
-        cursor = conn.cursor()
-        sql = 'SELECT P.text, P.sPOS, U.gender FROM posts P, users U WHERE P.user_id = U.id;'
-        cursor.execute(sql)
-        row = cursor.fetchone()
-        dimensions = []
-        classes = []
-        documentList = []
-        while row is not None:
-            sPOS = row['sPOS']
-            document = Document(row['text'],sPOS)
-            dimensions.append(sPOS)
-            classes.append(row['gender'])
-            documentList.append(document)
-
-            row = cursor.fetchone()
-
-        return {'Dimensions': dimensions, 'Classes': classes, 'Documents': documentList}
 
 

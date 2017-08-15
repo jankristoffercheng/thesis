@@ -3,7 +3,7 @@ from features.WordCount import WordCount
 import nltk
 class Structure:
 
-    ABBREVIATIONS_FILENAME = '../features/abbreviations.txt'
+    ABBREVIATIONS_FILENAME = 'features/abbreviations.txt'
     def __init__(self):
         with open(self.ABBREVIATIONS_FILENAME) as f:
             ABBREVIATIONS = f.read().splitlines()

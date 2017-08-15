@@ -5,7 +5,7 @@ from collections import Counter
 
 class WordCount:
 
-    ABBREVIATIONS_FILENAME = '../features/abbreviations.txt'
+    ABBREVIATIONS_FILENAME = 'features/abbreviations.txt'
 
     def __init__(self):
         with open(self.ABBREVIATIONS_FILENAME) as f:

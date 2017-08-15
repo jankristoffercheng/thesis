@@ -85,12 +85,3 @@ def addusers(limit=None):
                                (row[0], sex, row[11], 'Twitter'))
                 ind+=1
 
-def fixjson():
-    import fileinput
-
-    with fileinput.FileInput('edsthesis_data.json', inplace=True, backup='.bak') as file:
-        for line in file:
-            print(line.replace('}{', '},{'), end='')
-
-#fixjson()
-# addposts()

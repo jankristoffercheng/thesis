@@ -4,7 +4,14 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 
 class Context:
+    """
+    Returns the contextual features (words after 'my') in a text
+    """
     def process(self,s):
+        """
+        :param s: text to be processed
+        :return: text containing the contextual features
+        """
         s = s.lower()
         s = s.translate({ord(c): " " for c in string.punctuation})
         words = s.split()
