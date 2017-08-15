@@ -13,7 +13,7 @@ class StackAgeRangeWrap(TransformerMixin):
 
         # agerange = X.apply(enrange)
 
-        mlb = MultiLabelBinarizer(classes=[0,1])
+        mlb = MultiLabelBinarizer(classes=[0,1,2,3,4])
         temp = X.apply(lambda x: [x])
         data = DataFrame(data=mlb.fit_transform(temp), columns=["Stk." + age for age in getClasses()], index=X.index.values)
 
