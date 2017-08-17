@@ -16,7 +16,9 @@ class POSSequencePattern:
         self.retrievePOSTags_docFrequecy()
 
     def retrievePOSTags_docFrequecy(self):
-
+        """
+        creates a dictionary with the POS tags document frequency
+        """
         tagDict = {}
         for document in self.documentList:
             # tag[0] = word
@@ -30,7 +32,11 @@ class POSSequencePattern:
         self.tagList = tagDict.keys()
 
     def minePOSPatterns(self, minsup, minadherence):
-
+        """
+        :param minsup: user-supplied minimum support
+        :param minadherence: user-supplied minimum adherence
+        :return: list of pos patterns that satisfy the thresholds
+        """
         self.fList.append(
             {tag: count for tag, count in self.cList[0].items() if count / len(self.documentList) >= minsup})
         sequencePatterns = []
@@ -56,6 +62,11 @@ class POSSequencePattern:
         return sequencePatterns
 
     def computeFairSCP(self, key, count):
+        """
+        :param key: pos sequence
+        :param count: document frequency of pos sequence
+        :return: symmetrical conditional probability of given pos sequence
+        """
         sumResult = 0
         tagSplit = key.split("-")
         seqLen = len(tagSplit)
@@ -74,6 +85,10 @@ class POSSequencePattern:
         return math.pow(count, 2) / (1 / (seqLen - 1) * sumResult)
 
     def candidateGen(self, fList):
+        """
+        :param: fList: list of POS sequence generated previously
+        :return: dictionary of POS sequences newly generated, all initialized with a value of 0
+        """
         countPOS = {}
         for key in fList:
             value = fList[key]

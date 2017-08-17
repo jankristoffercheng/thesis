@@ -8,11 +8,18 @@ class WordCount:
     ABBREVIATIONS_FILENAME = 'features/abbreviations.txt'
 
     def __init__(self):
+        """
+        initializes the list of abbreviations from a text file
+        """
         with open(self.ABBREVIATIONS_FILENAME) as f:
             ABBREVIATIONS = f.read().splitlines()
         self.ABBREVIATIONS = [abbrev.lower() for abbrev in ABBREVIATIONS]
 
     def getTotalNumberOfWords(self, text):
+        """
+        :param text: string to be used
+        :return: total number of words
+        """
         nWords = 0
         words = nltk.word_tokenize(text)
         for word in words:
@@ -21,6 +28,10 @@ class WordCount:
         return nWords
 
     def getNWordsBegCapital(self, text):
+        """
+        :param text: string to be used
+        :return: number of words beginning with a capital letter
+        """
         count = 0
         words = nltk.word_tokenize(text)
         for word in words:
@@ -29,6 +40,10 @@ class WordCount:
         return count
 
     def getAveLengthWords(self, text):
+        """
+        :param text: string to be used
+        :return: average length of words
+        """
         aveLength = 0
         nWords = 0
         words = nltk.word_tokenize(text)
@@ -40,6 +55,10 @@ class WordCount:
         else: return aveLength/nWords
 
     def getNWordsWithRepLetters(self, text):
+        """
+        :param text: string to be used
+        :return: number of words with repeating letters
+        """
         nWords = 0
         words = nltk.word_tokenize(text)
         for word in words:
@@ -62,6 +81,10 @@ class WordCount:
         return nWords
 
     def getRatioOfUniqueWords(self, text):
+        """
+        :param text: string to be used
+        :return: ratio of unique words to total number of words
+        """
         words = nltk.word_tokenize(text)
         legitWords = []
         for word in words:
@@ -72,6 +95,10 @@ class WordCount:
         else: return len(set(legitWords))/len(legitWords)
 
     def getRatioOfShortWords(self, text):
+        """
+        :param text: string to be used
+        :return: ratio of words with less than 3 characters to total number of words
+        """
         words = nltk.word_tokenize(text)
         nShortWords = 0
         nWords = 0
@@ -84,6 +111,10 @@ class WordCount:
         else: return nShortWords/nWords
 
     def getLolHmmCount(self, text):
+        """
+        :param text: string to be used
+        :return: number of lol's and hmm's with the use of regex
+        """
         count = 0
         lolPattern = re.compile('l+o+l+')
         hmmPattern = re.compile('h+m+')
@@ -95,6 +126,10 @@ class WordCount:
         return count
 
     def getHapaxLegomena(self, text):
+        """
+        :param text: string to be used
+        :return: hapax legomena
+        """
         onceWords = []
         nWords = 0
         words = nltk.word_tokenize(text)
@@ -111,6 +146,10 @@ class WordCount:
         return len(onceWords)
 
     def getHapaxDislegomena(self, text):
+        """
+        :param text: string to be used
+        :return: hapax dislegomena
+        """
         twiceWords = []
         nWords = 0
         words = nltk.word_tokenize(text)
@@ -127,18 +166,30 @@ class WordCount:
         return len(twiceWords)
 
     def getRatioOfHapaxLegomena(self, text):
+        """
+        :param text: string to be used
+        :return: ratio of hapax legomena to total number of words
+        """
         if (self.getTotalNumberOfWords(text) == 0):
             return 0
         else:
             return self.getHapaxLegomena(text)/self.getTotalNumberOfWords(text)
 
     def getRatioOfHapaxDislegomena(self, text):
+        """
+        :param text: string to be used
+        :return: ratio of hapax dislegomena to total number of words
+        """
         if (self.getTotalNumberOfWords(text) == 0):
             return 0
         else:
             return self.getHapaxDislegomena(text)/self.getTotalNumberOfWords(text)
 
     def getWordLengthFreqDist(self, text):
+        """
+        :param text: string to be used
+        :return: an array with the word length frequency distribution from length 1 to 20
+        """
         nWords = 0
         freqDist = [0 for i in range(20)]
         words = nltk.word_tokenize(text)
@@ -152,6 +203,10 @@ class WordCount:
         return freqDist
 
     def getRatioOfNetAbbrev(self, text):
+        """
+        :param text: string to be used
+        :return: ratio of net abbriavtions to toal number of words
+        """
         words = nltk.word_tokenize(text)
         legitWords = []
         for word in words:
@@ -166,6 +221,10 @@ class WordCount:
             return len(abbrevs)/self.getTotalNumberOfWords(text)
 
     def getDictOfWordsMappedToOccurrence(self, text):
+        """
+        :param text: string to be used
+        :return: dictionary of words mapped to occurrence
+        """
         words = nltk.word_tokenize(text)
         legitWords = []
         for word in words:
@@ -175,6 +234,10 @@ class WordCount:
         return wordDict
 
     def getOccurrenceArray(self, text):
+        """
+        :param text: string to be used
+        :return: array of word occurrences
+        """
         wordDict = self.getDictOfWordsMappedToOccurrence(text)
         if(len(wordDict)>0):
             maxKey = max(wordDict, key=wordDict.get)
@@ -186,6 +249,10 @@ class WordCount:
         else: return []
 
     def getYulesK(self, text):
+        """
+        :param text: string to be used
+        :return: yules k measure
+        """
         summation = 0
         occurrenceA = self.getOccurrenceArray(text)
         N = self.getTotalNumberOfWords(text)
@@ -197,6 +264,10 @@ class WordCount:
             return 10000 * ((-1/N) + summation)
 
     def getSimpsonsD(self, text):
+        """
+        :param text: string to be used
+        :return: simpsons d
+        """
         summation = 0
         occurrenceA = self.getOccurrenceArray(text)
         N = self.getTotalNumberOfWords(text)
@@ -205,6 +276,10 @@ class WordCount:
         return summation
 
     def getNDifferentWords(self, text):
+        """
+        :param text: string to be used
+        :return: number of unique words
+        """
         words = nltk.word_tokenize(text)
         legitWords = []
         for word in words:
@@ -213,10 +288,18 @@ class WordCount:
         return len(set(legitWords))
 
     def getSichelsS(self, text):
+        """
+        :param text: string to be used
+        :return: sichels s
+        """
         if(self.getNDifferentWords(text)>0): return self.getHapaxDislegomena(text)/self.getNDifferentWords(text)
         else: return 0
 
     def getHonoresR(self, text):
+        """
+        :param text: string to be used
+        :return: honores r
+        """
         N = self.getTotalNumberOfWords(text)
         V = self.getNDifferentWords(text)
         hapaxLegomena = self.getHapaxLegomena(text)
@@ -224,6 +307,10 @@ class WordCount:
         else: return 0
 
     def getEntropy(self, text):
+        """
+        :param text: string to be used
+        :return: entropy
+        """
         summation = 0
         occurrenceA = self.getOccurrenceArray(text)
         N = self.getTotalNumberOfWords(text)

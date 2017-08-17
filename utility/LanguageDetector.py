@@ -3,30 +3,6 @@ from langdetect import DetectorFactory
 from langdetect import lang_detect_exception
 
 
-#import goslate
-#gs = goslate.Goslate()
-#print(gs.translate('What ill today be?', 'zh'))
-#print(gs.translate('Bakit ganun ayaw?', 'en'))
-#print(gs.translate('Dahil puno na sa seeing you Shayane.', 'en'))
-
-
-'''import polyglot
-from polyglot.text import Text, Word
-
-from utility.NormalizeFilipino import NormalizeFilipino
-
-text = Text("Mahal ko kayo lahat! Alam niyo ba yun?")
-print("Language Detected: Code={}, Name={}\n".format(text.language.code, text.language.name))
-
-
-from polyglot.transliteration import Transliterator
-#transliterator = Transliterator(source_lang="en", target_lang="tl")
-#print(transliterator.transliterate(u"I love you"))
-
-blob = """We will meet at eight o'clock on Thursday morning."""
-text = Text(blob)
-for x in text.transliterate("tl"):
-  print(x)'''
 
 class Language:
     UNKNOWN = -1
@@ -34,8 +10,11 @@ class Language:
     FILIPINO = 1
     TAGLISH = 2
 
-    # method in case you want to decipher the codes :)
     def getLanguage(self, code):
+        """
+            :param code: integer assigned to represent a language
+            :return: the meaning of the codes
+        """
         if code == -1:
             return "UNKNOWN"
         elif code == 0:
@@ -51,7 +30,10 @@ class LanguageDetector:
         DetectorFactory.seed = 0  # to enforce consistent results
 
     def getLanguage(self, text):
-
+        """
+            :param text: string to be language detected
+            :return: "ENGLISH", "FILIPINO" or "TAGALOG", else "UNKNOWN"
+        """
         try:
             result = detect_langs(text)[0]
 
@@ -68,13 +50,20 @@ class LanguageDetector:
             return Language.UNKNOWN
 
     def getLanguageDetailed(self, text):
-
+        """
+            :param text: string to be language identified
+            :return: detailed probabilities of the languages detected, else "UNKNOWN"
+        """
         try:
             print(detect_langs(text))
         except:
             print("UNKNOWN")
 
     def englishOrTagalog(self, string):
+        """
+            :param string: string to be identified as either English or Tagalog
+            :return: strings of "en" (English) or "tl" (Tagalog)
+        """
         res = detect_langs(string)
         for item in res:
             if item.lang == "tl" or item.lang == "en":
