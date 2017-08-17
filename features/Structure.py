@@ -14,9 +14,17 @@ class Structure:
         self.wordCounter = WordCount()
 
     def getNSentences(self,text):
+        """
+        :param text: text to be processed
+        :return: returns an integer of the number of sentences detected on the text
+        """
         return len(self.tokenizer.tokenize(text))
 
     def getAvgNWordPerSentence(self, text):
+        """
+        :param text: text to be processed
+        :return: returns a float of the average number of words per sentences detected on the text
+        """
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nSentences = self.getNSentences(text)
         if nSentences == 0:
@@ -24,6 +32,10 @@ class Structure:
         return nWords/nSentences
 
     def getNSentenceBegUpper(self,text):
+        """
+        :param text: text to be processed
+        :return: returns an integer on the number of sentences beginning with an uppercase.
+        """
         nCount = 0
         for sentence in self.tokenizer.tokenize(text):
             words = nltk.word_tokenize(sentence)
@@ -32,6 +44,10 @@ class Structure:
         return nCount
 
     def getNSentenceBegLower(self,text):
+        """
+        :param text: text to be processed
+        :return: returns an integer on the number of sentences beginning with an lowercase.
+        """
         nCount = 0
         for sentence in self.tokenizer.tokenize(text):
             words = nltk.word_tokenize(sentence)
@@ -40,12 +56,25 @@ class Structure:
         return nCount
 
     def getParagraphs(self, text):
+        """
+        :param text: text to be processed
+        :return: returns a list containing the detected paragraphs
+        """
         return text.split('\n')
 
     def getNParagraphs(self, text):
+        """
+
+        :param text: text to be processed
+        :return: returns an integer of the number of detected paragraphs on the text.
+        """
         return len(self.getParagraphs(text))
 
     def getAvgNSentencePerParagraph(self,text):
+        """
+        :param text: text to be processed
+        :return: returns a float of the average number of sentences per paragraphs detected on the text
+        """
         nSentences = self.getNSentences(text)
         nParagraphs = self.getNParagraphs(text)
         if nParagraphs == 0:
@@ -53,6 +82,10 @@ class Structure:
         return nSentences/nParagraphs
 
     def getAvgNWordPerParagraph(self,text):
+        """
+        :param text: text to be processed
+        :return: returns a float on the average number of words per paragraphs detected on the text
+        """
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nParagraphs = self.getNParagraphs(text)
         if nParagraphs == 0:
@@ -62,16 +95,11 @@ class Structure:
     #not sure if correct implementation
     #are spaces counted/considered?
     def getAvgNCharacterPerParagraph(self,text):
+        """
+        :param text: text to be processed
+        :return: returns a float of the average number of characters per paragaphs detected on the text
+        """
         nChar = len(text)
         nParagraphs = self.getNParagraphs(text)
 
         return nChar/nParagraphs
-
-# structure = Structure()
-# print(structure.getNSentenceBegUpper("Nag-aral nang masaya ang mga mag-aaral. pupunta sa paaralan ang mga mag-aaral...dito na ba ?"))
-'''
-text = "Hi my name is shayane! \n do you kniw me?"
-print(text)
-posDAO = PostsDAO()
-posDAO.addPost("00031", text, "05", "30")
-'''

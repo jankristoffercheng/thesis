@@ -9,53 +9,40 @@ from utility.PostCleaner import PostCleaner
 import time
 
 class POSFeature:
-    VERB = 'VB'
-    ADJECTIVE = 'JJ'
-    UNKNOWN = 'UNK'
 
     def __init__(self):
-        self.nVerbs = 0
-        self.nAdjectives = 0
         self.sPOS = ''
         self.mapping = {}
         self.postCleaner = PostCleaner()
 
     def populateMappingDictionary(self):
-        # print("populating map dictionary...")
+        """
+            This method populates the dictionary to include the list of mapped
+            Filipino POS to its equivalent English POS by reading
+            the contents of the mapping.txt file
+        """
         with open("mapping.txt", "r") as file_object:
             for line in file_object:
                 splitline = line.split()
                 self.mapping[' '.join(splitline[1:])] = splitline[0]
 
     def getEnglishPOS(self, text):
-        '''jvmPath = jpype.getDefaultJVMPath()
-        jpype.startJVM(jvmPath, "-Djava.class.path=dependencies/NormAPI.jar;dependencies/RBPOST.jar")
-        rbpost = JPackage("rbpost").RBPOST
-
-        result = rbpost.tokenizer_Text(text)
-        tokenizedText = result.split(" ")
-        jpype.shutdownJVM()'''
-
-
+        """
+        :param text: text to be processed
+        :return: returns a string of the resulting POS tags joined by "-"
+        """
         tokenizedText = nltk.word_tokenize(text)
         pos = nltk.pos_tag(tokenizedText)
         pos = '-'.join([posTag[1] for posTag in pos])
         return pos
 
-    def getPOSCount(self, text):
-        tokenizedText = nltk.word_tokenize(text)
-        tagged = nltk.pos_tag(tokenizedText)
-        counts = Counter(tag for word, tag in tagged)
-        for key, value in counts.items():
-            if key.startswith(self.VERB):
-                self.nVerbs += value
-            if key.startswith(self.ADJECTIVE):
-                self.nAdjectives += value
-
-
     def getCombinedPOSTag(self, post):
+        """
+            This method combines the resulting English and Filipino POS tags from the two separate POS Tagger.
+            :param post: the document to be processed
+            :return: returns a string of combined POS tags joined by "-"
+        """
 
-        # print("combining pos...[",post.id,"]")
         #assumptions: engPOS and filPOS are strings that contains POS tags separated by -
         #step 1: split tweets/posts into sentences and mapped fpos to epos
 
@@ -75,8 +62,6 @@ class POSFeature:
         #step 1.2: get the resulting fpos tag
         splitFPOS = post.fpos.split("-")
 
-        #print("raw eng tags:", engTags)
-
         #step 1.3: mapped the fpos to its corresponding epos
         for i in range(len(splitFPOS)):
             if(i != len(splitFPOS)-1):
@@ -92,8 +77,6 @@ class POSFeature:
 
         startIndex = 0
 
-        #print("map fil tags:", filTags)
-
         #step 2: detect the language of each sentence
         langDetector = LanguageDetector()
 
@@ -101,7 +84,7 @@ class POSFeature:
         for sentence in nltk.sent_tokenize(text):
             language = langDetector.getLanguage(sentence)
             wordCount = len(sentence.split())
-            #print("word count:", wordCount , " sentence:", sentence, " language:", language)
+
             if(language == Language.FILIPINO):
                 for i in range(startIndex, wordCount + startIndex):
                     finalPOSTags.append(filTags[i])
@@ -112,11 +95,9 @@ class POSFeature:
                 if(len(engTags) != len(filTags)):
                     for i in range(startIndex, wordCount + startIndex):
                         finalPOSTags.append(engTags[i])
-                    # print("not same length...............................[",wordCount,"] ", sentence)
-                    #time.sleep(5.5)
+
                 else:
                     for i in range(startIndex, wordCount + startIndex):
-                       # print("index[",i,"] range:", wordCount +startIndex)
 
                         if (engTags[i] == filTags[i]):
                             finalPOSTags.append(engTags[i])
@@ -137,7 +118,6 @@ class POSFeature:
                             finalPOSTags.append(filTags[i])
 
             startIndex = startIndex + wordCount
-        #print("final result:",finalPOSTags)
         return '-'.join(finalPOSTags)
 
 
