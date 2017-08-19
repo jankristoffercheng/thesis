@@ -17,9 +17,17 @@ class PostCleaner:
             self.emojiDetector = re.compile(u'(' u'\ud83c[\udf00-\udfff]|'  u'\ud83d[\udc00-\ude4f\ude80-\udeff]|'  u'[\u2600-\u26FF\u2700-\u27BF])+',re.UNICODE)
 
     def normalizeUnicode(self,postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a text with the normalize unicode string
+        """
         return unicodedata.normalize('NFKC', postContent);
 
     def getEmojis(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a list of emojis detected in the text
+        """
         #print("get emoji:",postContent)
         postContent = postContent.encode('unicode_escape')
         postContent = str(postContent, 'unicode_escape')
@@ -31,7 +39,10 @@ class PostCleaner:
         return self.emojiDetector.findall(postContent)
 
     def insertSpace(self,postContent):
-
+        """
+        :param postContent: text to be processed
+        :return: returns a string formatted so that emojis that are sticked together will have a space in between them for easier processing later on
+        """
         stop = False
         i = 0
         while(stop == False):
@@ -45,19 +56,39 @@ class PostCleaner:
         return postContent
 
     def changeLinkToText(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a string where the links are replaced into the label "URL"
+        """
         return self.linkCleaner.sub('URL', postContent, count=0)
 
     def removeEmojis(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a string without the emojis
+        """
         postContent = postContent.encode('unicode_escape')
         postContent = str(postContent,'unicode_escape')
 
         return self.emojiDetector.sub('', postContent, count=0)
 
     def changeEmojisToText(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a string where the detected emojis are replaced into the label "EMOJI"
+        """
         return self.emojiDetector.sub('EMOJI ', postContent, count=0)
 
     def changeForeignToText(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a string where the detected foreign languages are replaced into the label "FOREIGN"
+        """
         return self.foreignDetector.sub('FOREIGN ', postContent,count=0)
 
     def fixAcronymSpaces(self, postContent):
+        """
+        :param postContent: text to be processed
+        :return: returns a string with fixed acronym spaces
+        """
         return self.acronymDetector.sub(r'\1', postContent, count=0)

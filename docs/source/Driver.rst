@@ -1,7 +1,7 @@
-Driver50 module
-===============
+Driver module
+=============
 
-.. automodule:: Driver50
+.. automodule:: Driver
     :members:
     :undoc-members:
     :show-inheritance:

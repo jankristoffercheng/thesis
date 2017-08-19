@@ -16,14 +16,14 @@ class Structure:
     def getNSentences(self,text):
         """
         :param text: text to be processed
-        :return: returns an integer of the number of sentences detected on the text
+        :return: returns an integer of the number of sentences detected in the text
         """
         return len(self.tokenizer.tokenize(text))
 
     def getAvgNWordPerSentence(self, text):
         """
         :param text: text to be processed
-        :return: returns a float of the average number of words per sentences detected on the text
+        :return: returns a float of the average number of words per sentences detected in the text
         """
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nSentences = self.getNSentences(text)
@@ -66,14 +66,14 @@ class Structure:
         """
 
         :param text: text to be processed
-        :return: returns an integer of the number of detected paragraphs on the text.
+        :return: returns an integer of the number of detected paragraphs in the text.
         """
         return len(self.getParagraphs(text))
 
     def getAvgNSentencePerParagraph(self,text):
         """
         :param text: text to be processed
-        :return: returns a float of the average number of sentences per paragraphs detected on the text
+        :return: returns a float of the average number of sentences per paragraphs detected in the text
         """
         nSentences = self.getNSentences(text)
         nParagraphs = self.getNParagraphs(text)
@@ -84,7 +84,7 @@ class Structure:
     def getAvgNWordPerParagraph(self,text):
         """
         :param text: text to be processed
-        :return: returns a float on the average number of words per paragraphs detected on the text
+        :return: returns a float on the average number of words per paragraphs detected in the text
         """
         nWords = self.wordCounter.getTotalNumberOfWords(text)
         nParagraphs = self.getNParagraphs(text)
@@ -97,7 +97,7 @@ class Structure:
     def getAvgNCharacterPerParagraph(self,text):
         """
         :param text: text to be processed
-        :return: returns a float of the average number of characters per paragaphs detected on the text
+        :return: returns a float of the average number of characters per paragraphs detected in the text
         """
         nChar = len(text)
         nParagraphs = self.getNParagraphs(text)
